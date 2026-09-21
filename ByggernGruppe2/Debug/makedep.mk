@@ -10,6 +10,10 @@ joystick.c
 
 main.c
 
+OLED_driver.c
+
+spi_driver.c
+
 sram_test.c
 
 uartdriver.c

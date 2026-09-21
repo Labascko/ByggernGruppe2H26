@@ -15,7 +15,10 @@
 
 
 
-
+void init_joy_b(void){
+	DDRE &= ~(1 << PE0);
+	PORTE |= (1 << PE0);
+}
 
 void joy_calibrate_auto(joy_pos *diff){
 	int8_t x = adc_read(0);

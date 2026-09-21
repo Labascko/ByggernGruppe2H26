@@ -148,6 +148,9 @@
     <Compile Include="clock_gen.h">
       <SubType>compile</SubType>
     </Compile>
+    <Compile Include="fonts.h">
+      <SubType>compile</SubType>
+    </Compile>
     <Compile Include="joystick.c">
       <SubType>compile</SubType>
     </Compile>
@@ -155,6 +158,18 @@
       <SubType>compile</SubType>
     </Compile>
     <Compile Include="main.c">
+      <SubType>compile</SubType>
+    </Compile>
+    <Compile Include="OLED_driver.c">
+      <SubType>compile</SubType>
+    </Compile>
+    <Compile Include="OLED_driver.h">
+      <SubType>compile</SubType>
+    </Compile>
+    <Compile Include="spi_driver.c">
+      <SubType>compile</SubType>
+    </Compile>
+    <Compile Include="spi_driver.h">
       <SubType>compile</SubType>
     </Compile>
     <Compile Include="sram_test.c">
