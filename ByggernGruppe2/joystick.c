@@ -13,11 +13,11 @@
 #include "adc.h"
 
 
-
-
 void init_joy_b(void){
 	DDRE &= ~(1 << PE0);
 	PORTE |= (1 << PE0);
+	EMCUCR &= ~(1 << ISC2);
+	GICR |= (1 << INT2);
 }
 
 void joy_calibrate_auto(joy_pos *diff){
@@ -53,7 +53,7 @@ joy_pos joy_pos_read(joy_pos diff){
 joy_dir joy_dir_read(joy_pos diff){
 	joy_pos pos = joy_pos_read(diff);
 	
-	if((abs(pos.x)<10) && (abs(pos.y)<10)){
+	if((abs(pos.x)<50) && (abs(pos.y)<50)){
 		return NEUTRAL;
 	}else if(abs(pos.x)>abs(pos.y)){
 		if(pos.x>0){

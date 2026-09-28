@@ -8,8 +8,10 @@
 #include <avr/io.h>
 #include <stdio.h>
 #include <avr/pgmspace.h>
+#include <string.h>
 #include "spi_driver.h"
 #include "fonts.h"
+#include "OLED_driver.h"
 
 void OLED_init(void){
 	//PB0 brukes til å styre datatype
@@ -71,4 +73,37 @@ void OLED_print(char* string, int n){
 			}
 		}
 	}
+}
+
+void OLED_print_inverted(char* string, int n){
+	PORTB |= (1<<PB0);
+	//printf(&string[2]);
+	for(int i=0; i<n; i++){
+		for(int u=0; u<8; u++){
+			if((int)string[i]-32 < sizeof(font8)){
+				spi_mastertransmit(~pgm_read_byte(&font8[(int)string[i]-32][u]), OLED);
+				}else{
+				spi_mastertransmit(~pgm_read_byte(&font8[(int)string[i]-32][u]), OLED);
+			}
+		}
+	}
+}
+
+
+
+void OLED_print_menu(Menu menu){
+	OLED_goto_column(0);
+	OLED_goto_line(0);
+	OLED_print(menu.title, strlen(menu.title));
+	for(int i=0; i<menu.num_items; i++){
+		OLED_goto_column(10);
+		OLED_goto_line(i+1);
+		if(i==menu.position){
+			OLED_print_inverted(menu.items[i].text, strlen(menu.items[i].text));
+		}else{
+			OLED_print(menu.items[i].text, strlen(menu.items[i].text));
+		}
+		
+	}
+	
 }

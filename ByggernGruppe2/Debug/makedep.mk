@@ -4,11 +4,17 @@
 
 adc.c
 
+CAN_driver.c
+
 clock_gen.c
+
+IO_board.c
 
 joystick.c
 
 main.c
+
+MCP2515_driver.c
 
 OLED_driver.c
 

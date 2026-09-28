@@ -12,14 +12,15 @@
 typedef enum {
 	CAN,
 	OLED,
-	IO
+	IO,
+	NONE
 }Slave;
 
 void spi_masterinit(void);
 
 void spi_mastertransmit(char cData, Slave slave);
 
-char spi_master_read();
+char spi_master_read(Slave slave);
 
 void spi_mastertransmit_bytes(char* cData, int n, Slave slave);
 

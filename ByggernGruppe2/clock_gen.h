@@ -9,8 +9,8 @@
 #ifndef CLOCK_GEN_H_
 #define CLOCK_GEN_H_
 
-void clock_gen_init(void);
-
+void timer1_init(void);
+void timer0_init(void);
 
 
 #endif /* CLOCK_GEN_H_ */
