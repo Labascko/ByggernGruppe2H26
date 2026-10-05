@@ -163,20 +163,21 @@ int main(void)
 	
 
 	
-	CAN_message test_message;
-	test_message.id = 0x0AAA;
-	test_message.length = 2;
-	test_message.data[0] = 0xAB;
-	test_message.data[1] = 0x11;
-	CAN_transmit(test_message.id, test_message.data, test_message.length);
+	//CAN_message test_message;
+	//test_message.id = 0x0AAA;
+	//test_message.length = 2;
+	//test_message.data[0] = 0xAB;
+	//test_message.data[1] = 0x11;
+	//CAN_transmit(test_message.id, test_message.data, test_message.length);
 	
-	_delay_ms(2000); //Teste med tid for å sende melding
+	//_delay_ms(2000); //Teste med tid for å sende melding
 	//
-	CAN_message received = CAN_read(0);
-	printf("%d",received.data[0]);
-	uint16_t id = 0;
+	//CAN_message received = CAN_read(0);
+	//printf("%d",received.data[0]);
+	//uint16_t id = 0;
+	printf("Starting node 1: \n");
 	while(1){
-		id += 1;
+		//id += 1;
 		new_direction = joy_dir_read(joy_diff);
 		if(direction!=new_direction){
 			if(new_direction == UP && current_menu->position>0){
@@ -189,7 +190,7 @@ int main(void)
 		OLED_print_menu(*current_menu);
 		
 		char data[2] = {1,2};
-		CAN_transmit(id,data,2);
+		//CAN_transmit(id,data,2);
 		//printf("test");
 
 		//Behandlig av flagg satt av interrupts:
@@ -199,6 +200,8 @@ int main(void)
 			OLED_reset();
 			current_menu = (current_menu->items[current_menu->position].child_menu);
 		}
+		
+		_delay_ms(1000);
 		
 		if (CAN_r0) {
 			CAN_r0 = 0;

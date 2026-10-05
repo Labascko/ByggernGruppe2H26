@@ -31,6 +31,14 @@ void CAN_init(void){
 	//4 T_Q enheter til PHSEG2
 	MCP2515_bit_modify(0x28, 0x07, 4-1);
 	
+	
+	// Sett RXB0 til å ta imot ALLE meldinger (skru av filtere) + aktiver Rollover (BUKT=1)
+	MCP2515_bit_modify(0x60, 0x64, 0x64);
+
+	// Sett RXB1 til å ta imot ALLE meldinger
+	MCP2515_bit_modify(0x70, 0x60, 0x60);
+	
+	
 	//skru på interrupts på RX0 og RX1
 	MCP2515_bit_modify(0x2B, 0x03, 0x03);
 	
@@ -38,7 +46,11 @@ void CAN_init(void){
 	GICR |= (1 << INT0);
 	
 	//set loopback mode
-	MCP2515_bit_modify(0x0F, 0xE0, 0x40);
+	//MCP2515_bit_modify(0x0F, 0xE0, 0x40);
+	
+	//set Normal mode
+	MCP2515_bit_modify(0x0F, 0xE0, 0x00);
+	
 }
 
 uint8_t CAN_transmit(uint16_t id, char* data, uint8_t length){
