@@ -31,10 +31,41 @@ COM3 serial port
 #define BAUD 9600
 #define MYUBRR FOSC/16/BAUD-1
 
+
+//ISR(INT0_vect) {
+	//printf("interrupt");
+	//uint8_t intflags = MCP2515_spi_read(0x2C);
+	//if(intflags & 0x01){
+		//CAN_r0 = 1;
+		//MCP2515_bit_modify(0x2E, 0x01, 0x00); // Tøm RX0IF
+	//}
+	//if(intflags & 0x02){
+		//CAN_r1 = 1;
+		//MCP2515_bit_modify(0x2E, 0x02, 0x00); // Tøm RX1IF
+	//}
+	////Skru av interrupt midlertidig
+	//GICR &= ~(1 << INT0);
+//}
+volatile int8_t CAN_r0 = 0;
+volatile int8_t CAN_r1 = 0;
+volatile CAN_message CAN_r0_msg;
+volatile CAN_message CAN_r1_msg;
 ISR(INT0_vect) {
-	char status = MCP2515_read_status();
+	// Les interrupt-flaggene fra MCP2515 (0x2E = CANINTF)
+	uint8_t intflags = MCP2515_spi_read(0x2C);
 	
+	if (intflags & 0x01) { // RX0IF
+		CAN_r0_msg = CAN_read(0); 
+		MCP2515_bit_modify(0x2C, 0x01, 0x00); // Tøm RX0IF
+		CAN_r0 = 1;
+	}
+	if (intflags & 0x02) { // RX1IF
+		CAN_r1_msg = CAN_read(1); 
+		MCP2515_bit_modify(0x2C, 0x02, 0x00); // Tøm RX1IF
+		CAN_r1 = 1;
+	}
 }
+
 
 volatile int8_t knapp_trykket = 0;
 ISR(INT2_vect) {
@@ -63,8 +94,6 @@ ISR(TIMER0_COMP_vect){
 		GICR |= (1 << INT2);
 		//printf("Timer ferdig");
 	}
-	
-	
 }
 
 int main(void)
@@ -95,7 +124,7 @@ int main(void)
 	 Menu main_menu;
 	 
 	 Menu sub_menu1;
-	 sub_menu1.title = "Hovedmeny";
+	 sub_menu1.title = "Hovedmenytest";
 	 sub_menu1.num_items = 4;
 	 sub_menu1.parent_menu = NULL;
 	 sub_menu1.position = 0;
@@ -126,21 +155,28 @@ int main(void)
 	
 	MCP2515_reset();
 	_delay_ms(10); // Gi MCP2515 litt tid til å starte opp
+	
+	CAN_init();
+	_delay_ms(100);
 
 	
 	
+
 	
+	CAN_message test_message;
+	test_message.id = 0x0AAA;
+	test_message.length = 2;
+	test_message.data[0] = 0xAB;
+	test_message.data[1] = 0x11;
+	CAN_transmit(test_message.id, test_message.data, test_message.length);
 	
+	_delay_ms(2000); //Teste med tid for å sende melding
+	//
+	CAN_message received = CAN_read(0);
+	printf("%d",received.data[0]);
+	uint16_t id = 0;
 	while(1){
-		//OLED_goto_column(0);
-		//OLED_goto_line(0);
-		//printf("%d ",joy_pos_read(joy_diff).x);	
-		////OLED_reset();
-		//char str[5];
-		//snprintf(str, sizeof(str), "%d", joy_pos_read(joy_diff).x);
-		//OLED_print(str, sizeof(str));
-		//OLED_goto_line(2);
-		//OLED_print("testasdasdsad", 8);
+		id += 1;
 		new_direction = joy_dir_read(joy_diff);
 		if(direction!=new_direction){
 			if(new_direction == UP && current_menu->position>0){
@@ -150,23 +186,32 @@ int main(void)
 			}
 		}
 		direction = new_direction;
-		
-		
 		OLED_print_menu(*current_menu);
-
 		
+		char data[2] = {1,2};
+		CAN_transmit(id,data,2);
+		//printf("test");
+
+		//Behandlig av flagg satt av interrupts:
+		//Reaksjon på trykking av knapp
 		if (knapp_trykket) {
-			knapp_trykket = 0; // Nullstill flagget
-			
-			// Kjør den treige koden her i stedet for i ISR-en:
-			// (Forutsetter at UART er satt opp)
+			knapp_trykket = 0; 
 			OLED_reset();
 			current_menu = (current_menu->items[current_menu->position].child_menu);
-			//printf("knapp trykket\n");
 		}
-
-			
+		
+		if (CAN_r0) {
+			CAN_r0 = 0;
+			printf("Mottatt melding på kanal 0 med id: %d\n", CAN_r0_msg.id);
+		}
+		if (CAN_r1) {
+			CAN_r1 = 0;
+			printf("Mottatt melding på kanal 1 med id: %d\n", CAN_r1_msg.id);
+		}
+		
 	}
+	
+	
 	
 	return 0;                                                                                                                                                                                                                                  
 }
