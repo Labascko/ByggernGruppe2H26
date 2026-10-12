@@ -71,7 +71,7 @@ struct Byte8 {
 //    // Should print: CanMsg(id:1, length:7, data:{10, 0, 20, 0, 0, 240, 193})
 typedef struct CanMsg CanMsg;
 struct CanMsg {
-    uint8_t id;
+    uint16_t id;
     uint8_t length;
     union {
         uint8_t     byte[8];
@@ -91,6 +91,9 @@ uint8_t can_rx(CanMsg* m);
 
 // Print a CAN message (using `printf`)
 void can_printmsg(CanMsg m);
+
+volatile CanMsg received_msg;
+volatile uint8_t received_msg_flag;
 
 
 

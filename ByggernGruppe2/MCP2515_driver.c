@@ -51,4 +51,5 @@ void MCP2515_RTS(char address){
 	if(address <= 7){
 		spi_mastertransmit(0x80+address, CAN);
 	}
+	slave_select(NONE);
 }

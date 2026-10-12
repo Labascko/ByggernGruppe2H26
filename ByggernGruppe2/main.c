@@ -53,7 +53,11 @@ volatile CAN_message CAN_r1_msg;
 ISR(INT0_vect) {
 	// Les interrupt-flaggene fra MCP2515 (0x2E = CANINTF)
 	uint8_t intflags = MCP2515_spi_read(0x2C);
+	if(intflags == 0xFF){
+		intflags = MCP2515_spi_read(0x2C);
+	}
 	
+	printf("Intflags i hex: 0x%X\n", intflags);
 	if (intflags & 0x01) { // RX0IF
 		CAN_r0_msg = CAN_read(0); 
 		MCP2515_bit_modify(0x2C, 0x01, 0x00); // Tøm RX0IF
@@ -176,8 +180,18 @@ int main(void)
 	//printf("%d",received.data[0]);
 	//uint16_t id = 0;
 	printf("Starting node 1: \n");
+	
+	CAN_message test;
+	test.id = 1234;
+	test.data[0] = 5;
+	test.data[1] = 7;
+	test.length = 2;
+	CAN_transmit(test);
+	
+	uint16_t id = 1;
 	while(1){
-		//id += 1;
+		id += 1;
+		test.data[1] += 1;
 		new_direction = joy_dir_read(joy_diff);
 		if(direction!=new_direction){
 			if(new_direction == UP && current_menu->position>0){
@@ -188,6 +202,7 @@ int main(void)
 		}
 		direction = new_direction;
 		OLED_print_menu(*current_menu);
+		
 		
 		char data[2] = {1,2};
 		//CAN_transmit(id,data,2);
@@ -201,7 +216,10 @@ int main(void)
 			current_menu = (current_menu->items[current_menu->position].child_menu);
 		}
 		
-		_delay_ms(1000);
+		
+		joy_send(joy_pos_read(joy_diff));
+		
+		_delay_ms(100);
 		
 		if (CAN_r0) {
 			CAN_r0 = 0;

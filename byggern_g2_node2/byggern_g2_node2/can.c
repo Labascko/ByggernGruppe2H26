@@ -55,8 +55,8 @@ void can_init(CanInit init, uint8_t rxInterrupt){
     // receive
     CAN0->CAN_MB[rxMailbox].CAN_MAM = 0; // Accept all messages
 	
-    //CAN0->CAN_MB[rxMailbox].CAN_MID = CAN_MID_MIDE; Bytte basert på gemini
-	CAN0->CAN_MB[rxMailbox].CAN_MID = 0;// Fjern CAN_MID_MIDE for å ta imot 11-bit
+    CAN0->CAN_MB[rxMailbox].CAN_MID = CAN_MID_MIDE; //Bytte basert på gemini
+	//CAN0->CAN_MB[rxMailbox].CAN_MID = 0;// Fjern CAN_MID_MIDE for å ta imot 11-bit
 	
     CAN0->CAN_MB[rxMailbox].CAN_MMR = CAN_MMR_MOT_MB_RX;
     CAN0->CAN_MB[rxMailbox].CAN_MCR |= CAN_MCR_MTCR;
@@ -78,8 +78,8 @@ void can_tx(CanMsg m){
 	}
     
     // Set message ID and use CAN 2.0B protocol
-    //CAN0->CAN_MB[txMailbox].CAN_MID = CAN_MID_MIDvA(m.id) | CAN_MID_MIDE ; Byttet basert på gemini
-	CAN0->CAN_MB[txMailbox].CAN_MID = CAN_MID_MIDvA(m.id);// Fjern CAN_MID_MIDE for å sende 11-bit
+    CAN0->CAN_MB[txMailbox].CAN_MID = CAN_MID_MIDvA(m.id) | CAN_MID_MIDE ; //Byttet basert på gemini
+	//CAN0->CAN_MB[txMailbox].CAN_MID = CAN_MID_MIDvA(m.id);// Fjern CAN_MID_MIDE for å sende 11-bit
         
     // Coerce maximum 8 byte length
     m.length = m.length > 8 ? 8 : m.length;
@@ -115,26 +115,29 @@ uint8_t can_rx(CanMsg* m){
     
     
 
-    
-/*
+   
 // Example CAN interrupt handler
+
 void CAN0_Handler(void){
-    char can_sr = CAN0->CAN_SR; 
-    
-    // RX interrupt
-    if(can_sr & (1 << rxMailbox)){
-        // Add your message-handling code here
-        can_printmsg(can_rx());
-    } else {
-        printf("CAN0 message arrived in non-used mailbox\n\r");
-    }
-    
-    if(can_sr & CAN_SR_MB0){
-        // Disable interrupt
-        CAN0->CAN_IDR = CAN_IER_MB0;
-    }
-    
-    NVIC_ClearPendingIRQ(ID_CAN0);
-} 
-*/
+	//printf("interrupt");
+	char can_sr = CAN0->CAN_SR;
+	
+	// RX interrupt
+	if(can_sr & (1 << rxMailbox)){
+		// Add your message-handling code here
+		can_rx(&received_msg);
+		received_msg_flag = 1;
+		//can_printmsg(can_rx(&received_msg));
+		} else {
+		printf("CAN0 message arrived in non-used mailbox\n\r");
+	}
+	
+	if(can_sr & CAN_SR_MB0){
+		// Disable interrupt
+		CAN0->CAN_IDR = CAN_IER_MB0;
+	}
+	
+	NVIC_ClearPendingIRQ(ID_CAN0);
+}
+
 

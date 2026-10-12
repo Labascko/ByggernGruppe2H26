@@ -14,6 +14,7 @@
 #define F_CPU 84000000
 
 
+
 int main(void)
 {
     /* Initialize the SAM system */
@@ -34,33 +35,41 @@ int main(void)
 	PIOC->PIO_CODR = (1u << 21);  // LOW
 	
 	
-	
 	//init av CAN
+	can_init((CanInit){.brp = 21-1, .phase1 = 4-1, .phase2 = 4-1, .propag = 7-1, .sjw = 0}, 1);
+	received_msg_flag = 0;
 	
-	
-	
-	can_init((CanInit){.brp = 21-1, .phase1 = 4-1, .phase2 = 4-1, .propag = 7-1, .sjw = 0}, 0);
 	CanMsg test_message;
-	test_message.id	= 5;
-	test_message.length = 8;
-	test_message.dword[0] = 628383;
-	test_message.dword[1] = 612383;
+	test_message.id	= 1;
+	test_message.length = 1;
+	test_message.byte[0] = 1;
 	
 	
 	
 	
-	can_tx(test_message);
+	//can_tx(test_message);
+	
+	CanMsg message;
 	
     while (1) 
     {
-		for(int i = 0; i < 1000000; i++){
+		 //can_rx(&message);
+		 //printf("Data 1: %d\n", received_msg.byte[1]);
+		
+		/*for(int i = 0; i < 1000000; i++){
 			PIOC->PIO_SODR = (1u << 21);  // HIGH
 			
 		}
 		printf("kjører");
 		for(int i = 0; i < 1000000; i++){
 			PIOC->PIO_CODR = (1u << 21);  // LOW
-			
+		}*/	
+		
+		if(received_msg_flag){
+			//Kode som kjøres når CAN melding mottas, oppdatert meldingsverdi i received_msg
+			printf("Data 1: %d\n", (int8_t)received_msg.byte[1]);
+			received_msg_flag = 0;
 		}
+			
     }
 }

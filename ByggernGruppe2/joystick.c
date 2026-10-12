@@ -11,6 +11,7 @@
 #include <stdio.h>
 #include "joystick.h"
 #include "adc.h"
+#include "CAN_driver.h"
 
 
 void init_joy_b(void){
@@ -73,4 +74,13 @@ joy_dir joy_dir_read(joy_pos diff){
 joy_pos touchpad_read(void){
 	joy_pos pos = {(adc_read(2)-0x80)*100/127, (adc_read(3)-0x80)*100/127};  
 	return pos;
+}
+
+void joy_send(joy_pos pos){
+	CAN_message send_pos;
+	send_pos.id = 0;
+	send_pos.data[0] = pos.x;
+	send_pos.data[1] = pos.y;
+	send_pos.length = 2;
+	CAN_transmit(send_pos);
 }

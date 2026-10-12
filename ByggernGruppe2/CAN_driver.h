@@ -16,7 +16,7 @@ typedef struct {
 }CAN_message;
 
 void CAN_init(void);
-uint8_t CAN_transmit(uint16_t id, char* data, uint8_t length);
+uint8_t CAN_transmit(CAN_message message);
 CAN_message CAN_read(uint8_t buffer);
 
 
