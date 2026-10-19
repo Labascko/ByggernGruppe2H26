@@ -12,6 +12,8 @@
 void pwm_init(void);
 void pwm_set_duty(uint16_t duty);
 
+void adc_init(void);
+
 
 
 #endif /* TIMER_H_ */

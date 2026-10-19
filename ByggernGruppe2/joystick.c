@@ -78,7 +78,7 @@ joy_pos touchpad_read(void){
 
 void joy_send(joy_pos pos){
 	CAN_message send_pos;
-	send_pos.id = 0;
+	send_pos.id = 0x0005;
 	send_pos.data[0] = pos.x;
 	send_pos.data[1] = pos.y;
 	send_pos.length = 2;

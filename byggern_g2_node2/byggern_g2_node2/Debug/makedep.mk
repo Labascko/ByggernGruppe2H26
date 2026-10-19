@@ -12,5 +12,7 @@ main.c
 
 time.c
 
+timer.c
+
 uart.c
 
