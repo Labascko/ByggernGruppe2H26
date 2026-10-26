@@ -71,17 +71,17 @@ uint8_t CAN_transmit(CAN_message message){
 	if(!(MCP2515_spi_read(0x30)&(1<<3))){
 		//Buffer 0 klar for ny melding
 		tx_base = 0x30;
-		printf("1");
+		//printf("1");
 	}else if(!(MCP2515_spi_read(0x40)&(1<<3))){
 		//Buffer 1 klar for ny melding
 		tx_base = 0x40;
-		printf("2");
+		//printf("2");
 	}else if(!(MCP2515_spi_read(0x50)&(1<<3))){
 		//Buffer 2 klar for ny melding
 		tx_base = 0x50;
-		printf("3");
+		//printf("3");
 	}else{
-		printf("feilet");
+		//printf("feilet");
 		return 0;
 	}
 	

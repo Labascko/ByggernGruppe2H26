@@ -57,7 +57,7 @@ ISR(INT0_vect) {
 		intflags = MCP2515_spi_read(0x2C);
 	}
 	
-	printf("Intflags i hex: 0x%X\n", intflags);
+	//printf("Intflags i hex: 0x%X\n", intflags);
 	if (intflags & 0x01) { // RX0IF
 		CAN_r0_msg = CAN_read(0); 
 		MCP2515_bit_modify(0x2C, 0x01, 0x00); // Tøm RX0IF
@@ -189,6 +189,9 @@ int main(void)
 	CAN_transmit(test);
 	
 	uint16_t id = 1;
+	
+	
+	uint16_t goals = 0;
 	while(1){
 		id += 1;
 		test.data[1] += 1;
@@ -223,11 +226,22 @@ int main(void)
 		
 		if (CAN_r0) {
 			CAN_r0 = 0;
-			printf("Mottatt melding på kanal 0 med id: %d\n", CAN_r0_msg.id);
+			//printf("Mottatt melding på kanal 0 med id: %d\n", CAN_r0_msg.id);
+			
+			if(CAN_r0_msg.id == 4){
+				goals += 1;
+			}
+			printf("Goals: %d \n", goals);
+			
 		}
 		if (CAN_r1) {
 			CAN_r1 = 0;
-			printf("Mottatt melding på kanal 1 med id: %d\n", CAN_r1_msg.id);
+			//printf("Mottatt melding på kanal 1 med id: %d\n", CAN_r1_msg.id);
+			
+			if(CAN_r0_msg.id == 4){
+				goals += 1;
+			}
+			printf("Goals: %d \n", goals);
 		}
 		
 	}

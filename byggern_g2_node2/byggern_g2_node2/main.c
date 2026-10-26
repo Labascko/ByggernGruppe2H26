@@ -13,16 +13,43 @@
 #include "can.h"
 #define F_CPU 84000000
 
-volatile int IR_flag = 0;
 
-
+volatile uint8_t IR_flag = 0;
 void PIOA_Handler(void)
 {
 	uint32_t status = PIOA->PIO_ISR;
-	printf("Interruptfuksjon kjører");
+	//printf("Interruptfuksjon kjører");
 	if (status & (1u << 28))
 	{
 		IR_flag = 1;
+	}
+}
+
+volatile uint8_t adc_up_flag = 0;
+volatile uint8_t adc_down_flag = 0;
+void ADC_Handler(void) {
+	uint32_t status = ADC->ADC_ISR;
+	// Sjekk om det var comparison interrupt som utløste avbruddet
+	if (status & ADC_ISR_COMPE) {
+		// Hva er nåværende tilstand?
+		if ((ADC->ADC_EMR & ADC_EMR_CMPMODE_Msk) == ADC_EMR_CMPMODE_HIGH) {
+			// Vi passerte HØY terskel (> 2200)
+			// Endre hardware til å vente på at signalet faller under LAV terskel (< 1800)
+			ADC->ADC_EMR = (ADC->ADC_EMR & ~ADC_EMR_CMPMODE_Msk) | ADC_EMR_CMPMODE_LOW;
+			adc_up_flag = 1;
+			
+			//uint32_t current_adc_val = ADC->ADC_CDR[7];
+			//printf("ADC: %d \n", current_adc_val);
+		}
+		else {
+			// Vi passerte LAV terskel (< 1800) 
+			// Endre hardware til å vente på at signalet stiger over HØY terskel (> 2200)
+			ADC->ADC_EMR = (ADC->ADC_EMR & ~ADC_EMR_CMPMODE_Msk) | ADC_EMR_CMPMODE_HIGH;
+			adc_down_flag = 1;
+			
+			//uint32_t current_adc_val = ADC->ADC_CDR[7];
+			//printf("ADC: %d \n", current_adc_val);
+		}
 	}
 }
 
@@ -35,6 +62,10 @@ int main(void)
 	
     uart_init(F_CPU, 9600);
     printf("Starting node 2:\n\r");
+	
+	adc_init();
+	//setup_adc_test();
+	
 	
 	
 	// Enable PCIO clock
@@ -82,8 +113,10 @@ int main(void)
 	test_message.length = 1;
 	test_message.byte[0] = 1;
 	
-	pwm_init();
+	servo_pwm_init();
+	timer_encoder_init();
 	
+	pwm_init();
 	
 	
 	
@@ -92,16 +125,17 @@ int main(void)
 	
 	CanMsg message;
 	
-	//pwm_set_duty(2100);
+	servo_pwm_set_duty(2100);
 	for(int i =0; i<1000000; i++){}
-	pwm_set_duty(1500);
+	servo_pwm_set_duty(1500);
 	
 	
 	int16_t servopos = 1500;
     while(1) 
     {
 		
-		
+		//uint32_t val = read_adc_value();
+		//printf("ADC: %d \n", val);
 		//pwm_set_duty(2000);
 		 //can_rx(&message);
 		 //printf("Data 1: %d\n", received_msg.byte[1]);
@@ -121,6 +155,13 @@ int main(void)
 			//printf("Input: LOW\n");
 		}
 		
+		
+		
+		uint32_t posisjon = TC2->TC_CHANNEL[0].TC_CV;
+		printf("Posisjon: %d \n",posisjon);
+		
+		
+		
 		if(received_msg_flag){
 			//Kode som kjøres når CAN melding mottas, oppdatert meldingsverdi i received_msg
 			
@@ -137,16 +178,19 @@ int main(void)
 				}else if(servopos < 900){
 					servopos = 900;
 				}
-				pwm_set_duty(servopos);
+				servo_pwm_set_duty(servopos);
 				
 			}
 			
 			received_msg_flag = 0;
 		}
-		if (IR_flag)
-		{
-			printf("IR interrupt");
-			IR_flag = 0;
+		if(adc_down_flag){
+			CanMsg goal = {.id = 4, .length = 1, .byte[0]=1};
+			can_tx(goal);
+			adc_down_flag = 0;
+		}
+		if(adc_up_flag){
+			adc_up_flag = 0;
 		}
 			
     }

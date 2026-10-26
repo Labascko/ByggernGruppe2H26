@@ -9,11 +9,14 @@
 #ifndef TIMER_H_
 #define TIMER_H_
 
+void servo_pwm_init(void);
+void servo_pwm_set_duty(uint16_t duty);
+
 void pwm_init(void);
 void pwm_set_duty(uint16_t duty);
 
 void adc_init(void);
-
+void timer_encoder_init(void);
 
 
 #endif /* TIMER_H_ */
