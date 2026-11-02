@@ -220,9 +220,11 @@ int main(void)
 		}
 		
 		
-		joy_send(joy_pos_read(joy_diff));
+		joy_send(touchpad_read(), 0x0006);
+		joy_send(joy_pos_read(joy_diff), 0x0005);
 		
-		_delay_ms(100);
+		
+		//_delay_ms(10);
 		
 		if (CAN_r0) {
 			CAN_r0 = 0;

@@ -24,7 +24,7 @@
 
 
 
-#define ADC_CHANNEL 7
+#define ADC_CHANNEL 7 //Må bruke pinne D54
 
 #define LIGHT_ON_LEVEL   2500
 #define LIGHT_OFF_LEVEL  1800
@@ -103,7 +103,7 @@ void pwm_init(void){
 	PWM->PWM_CH_NUM[PWM_CHANNEL].PWM_CPRD = FULL_CYCLE;
 	
 	//sett start duty-cycle
-	PWM->PWM_CH_NUM[PWM_CHANNEL].PWM_CDTY = 20000; //
+	PWM->PWM_CH_NUM[PWM_CHANNEL].PWM_CDTY = 10000; //
 	
 	//Enable
 	PWM->PWM_ENA = PWM_ENA_CHID0;
@@ -204,3 +204,28 @@ void adc_init(void){
     //ADC->ADC_CR = ADC_CR_START;
 	
 }
+
+
+
+void timer3_init(void) {
+	// 2. Enable peripheral clock for TC3 (ID_TC3 = 30, which is TC1 Channel 0)
+	PMC->PMC_PCER0 = (1u << ID_TC3);
+
+	// 3. Configure TC1 Channel 0 in Waveform Mode, UP clock with RC compare reset, clock = MCK/2
+	TC1->TC_CHANNEL[0].TC_CMR = TC_CMR_TCCLKS_TIMER_CLOCK1 |
+	TC_CMR_WAVE |
+	TC_CMR_WAVSEL_UP_RC;
+
+	// 4. Set RC value for 1 Hz (42 MHz / 1 = 42000000)
+	TC1->TC_CHANNEL[0].TC_RC = 4200000;
+
+	// 5. Enable Interrupt on RC Compare
+	TC1->TC_CHANNEL[0].TC_IER = TC_IER_CPCS;
+	
+	// 6. Enable TC3 interrupt vector in NVIC
+	NVIC_EnableIRQ(TC3_IRQn);
+
+	// 7. Start Timer
+	TC1->TC_CHANNEL[0].TC_CCR = TC_CCR_CLKEN | TC_CCR_SWTRG;
+}
+

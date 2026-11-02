@@ -6,11 +6,15 @@
  */ 
 
 #include <stdio.h>
+#include <unistd.h>
+#include <time.h>
+
 
 #include "sam.h"
 #include "uart.h"
 #include "time.h"
 #include "can.h"
+
 #define F_CPU 84000000
 
 
@@ -53,6 +57,39 @@ void ADC_Handler(void) {
 	}
 }
 
+volatile int16_t error_integral = 0;
+int16_t error = 0;
+int16_t posref = 0;
+int16_t k_p = 3;
+int16_t k_i = 1;
+// T = 100ms
+
+void TC3_Handler(void) {
+	
+	
+	if(abs(error)>150){
+		error_integral += error;
+		int16_t input = k_p  * error + k_i * error_integral/5;
+		if(input<0){
+			PIOC->PIO_SODR = (1u << 23);  // HIGH motorretning
+			pwm_set_duty(20000+input);
+		} else{
+			PIOC->PIO_CODR = (1u << 23);  // LOW motorretning
+			pwm_set_duty(20000-input);
+		}
+	}else{
+		pwm_set_duty(20000);
+	}
+	
+	
+	//printf("Referanse: %d\n", posref);
+	//printf("Error: %d \n", error);
+	//printf("Pådrag: %d \n", input);
+	//printf("Feilintegral: %d\n", error_integral/ 10);
+	// Reading the Status Register (TC_SR) for TC1 Channel 0 clears the interrupt flag
+	volatile uint32_t status = TC1->TC_CHANNEL[0].TC_SR;
+}
+
 int main(void)
 {
     /* Initialize the SAM system */
@@ -66,17 +103,31 @@ int main(void)
 	adc_init();
 	//setup_adc_test();
 	
+	timer3_init();
+	
+	
+	//Ordne pinne B14 som styringssignal til solenoide:
+	// Enable PCIO clock
+	PMC->PMC_PCER0 = (1u << ID_PIOB);
+
+	PIOB->PIO_PER = (1u << 14);
+	PIOB->PIO_OER = (1u << 14);
+	
+	//Styre solenoide
+	PIOB->PIO_SODR = (1u << 14);  // HIGH
+	PIOB->PIO_CODR = (1u << 14);  // LOW
 	
 	
 	// Enable PCIO clock
-    //PMC->PMC_PCER0 = (1u << ID_PIOC);
+    PMC->PMC_PCER0 = (1u << ID_PIOC);
 
-    //PIOC->PIO_PER = (1u << 21);
-    //PIOC->PIO_OER = (1u << 21);
+    PIOC->PIO_PER = (1u << 23);
+    PIOC->PIO_OER = (1u << 23);
 	
-	//PIOC->PIO_SODR = (1u << 21);  // HIGH
+	//PIOC->PIO_SODR = (1u << 23);  // HIGH
+	PIOC->PIO_CODR = (1u << 23);  // LOW
 	
-	//PIOC->PIO_CODR = (1u << 21);  // LOW
+	
 	
 	PMC->PMC_PCER0 = (1u << ID_PIOA);
 	
@@ -131,34 +182,55 @@ int main(void)
 	
 	
 	int16_t servopos = 1500;
+	//int16_t error_integral = 0;
+	//int16_t k_p = 3;
+	//int16_t k_i = 1;
+	
+	int8_t right = 0;
+	pwm_set_duty(15000);
     while(1) 
     {
-		
-		//uint32_t val = read_adc_value();
-		//printf("ADC: %d \n", val);
-		//pwm_set_duty(2000);
-		 //can_rx(&message);
-		 //printf("Data 1: %d\n", received_msg.byte[1]);
-		
-		/*for(int i = 0; i < 1000000; i++){
-			PIOC->PIO_SODR = (1u << 21);  // HIGH
-			
-		}
-		printf("kjører");
-		for(int i = 0; i < 1000000; i++){
-			PIOC->PIO_CODR = (1u << 21);  // LOW
-		}*/	
-		
-		if(PIOA->PIO_PDSR & (1u << 28)){
-			//printf("Input: HIGH\n");
-		}else{
-			//printf("Input: LOW\n");
-		}
+		int16_t position = TC2->TC_CHANNEL[0].TC_CV;
+		error = posref - position;
 		
 		
+		//printf("Posisjon: %d \n",position);
 		
-		uint32_t posisjon = TC2->TC_CHANNEL[0].TC_CV;
-		printf("Posisjon: %d \n",posisjon);
+		//int16_t error = posref - position;
+		//error_integral += error/10;
+		//
+		//int16_t input = k_p * error; //+ k_i * error_integral;
+		
+		//if(input<0){
+			//PIOC->PIO_SODR = (1u << 23);  // HIGH motorretning
+			//pwm_set_duty(20000+input);
+		//}else{
+			//PIOC->PIO_CODR = (1u << 23);  // LOW motorretning
+			//pwm_set_duty(20000-input);
+		//}
+		//printf("Posref: %d \n", posref);
+		//printf("Error: %d\n",error);
+		//printf("Pådrag: %d\n", input);
+		
+		
+		//if (position > 1500 && !right){
+			//pwm_set_duty(20000);
+			////_delay_ms(10);
+			//PIOC->PIO_SODR = (1u << 23);  // HIGH motorretning
+			//
+			//right = 1;
+			//pwm_set_duty(15000);
+		//}
+		//if (position < 500 && right){
+			//pwm_set_duty(20000);
+			//
+			//PIOC->PIO_CODR = (1u << 23);  // LOW motorretning
+			//right = 0;
+			//pwm_set_duty(15000);
+		//}
+		
+		
+		
 		
 		
 		
@@ -179,14 +251,19 @@ int main(void)
 					servopos = 900;
 				}
 				servo_pwm_set_duty(servopos);
-				
+			}
+			
+			if(received_msg.id == 0x0006){
+				//printf("Touchpad posisjon x: %d \n", (int8_t)received_msg.byte[1]);
+				posref = (int16_t)(((int8_t)received_msg.byte[1])*(-1)+100)*10;
+				//posref = (int8_t)received_msg.byte[1];
 			}
 			
 			received_msg_flag = 0;
 		}
 		if(adc_down_flag){
 			CanMsg goal = {.id = 4, .length = 1, .byte[0]=1};
-			can_tx(goal);
+			//can_tx(goal);
 			adc_down_flag = 0;
 		}
 		if(adc_up_flag){
