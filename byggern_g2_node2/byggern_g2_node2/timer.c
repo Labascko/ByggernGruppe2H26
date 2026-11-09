@@ -26,8 +26,8 @@
 
 #define ADC_CHANNEL 7 //Må bruke pinne D54
 
-#define LIGHT_ON_LEVEL   2500
-#define LIGHT_OFF_LEVEL  1800
+#define ADC_ON_LEVEL   2350
+#define ADC_OFF_LEVEL  800
 
 void servo_pwm_init(void){
 	//Kanal 1:
@@ -177,8 +177,8 @@ void adc_init(void){
      * HIGH = 2200
      */
     ADC->ADC_CWR =
-          ADC_CWR_LOWTHRES(LIGHT_OFF_LEVEL)
-        | ADC_CWR_HIGHTHRES(LIGHT_ON_LEVEL);
+          ADC_CWR_LOWTHRES(ADC_OFF_LEVEL)
+        | ADC_CWR_HIGHTHRES(ADC_ON_LEVEL);
 
     /*
      * Initially light is considered OFF.

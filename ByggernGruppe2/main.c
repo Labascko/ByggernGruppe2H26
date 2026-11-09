@@ -213,15 +213,48 @@ int main(void)
 
 		//Behandlig av flagg satt av interrupts:
 		//Reaksjon på trykking av knapp
+		
+		
+		
+		
+		volatile CAN_message send_pos;
+		send_pos.id = 0x0003;
+		send_pos.length = 5;
+		
+		joy_pos stick = joy_pos_read(joy_diff);
+		send_pos.data[0] = stick.x;
+		send_pos.data[1] = stick.y;
+		
+		send_pos.data[2] = 0;
+		
+		joy_pos pad = touchpad_read();
+		send_pos.data[3] = pad.x;
+		send_pos.data[4] = pad.y;
+		
 		if (knapp_trykket) {
+			printf("sender solenoidemelding");
+			joy_send(joy_pos_read(joy_diff), 0x0008);
+			
 			knapp_trykket = 0; 
 			OLED_reset();
 			current_menu = (current_menu->items[current_menu->position].child_menu);
+			
+			send_pos.data[2] = 1;
+			
+			
+			//CAN_message msg = {.id = 0x0004, .length = 1, .data[0] = 0xaa};
+			
+			
+			//CAN_transmit(msg);
 		}
 		
 		
-		joy_send(touchpad_read(), 0x0006);
-		joy_send(joy_pos_read(joy_diff), 0x0005);
+		printf("%d",send_pos.data[2]);
+		CAN_transmit(send_pos);
+		//joy_send(touchpad_read(), 0x0006);
+		//joy_send(joy_pos_read(joy_diff), 0x0005);
+		
+		
 		
 		
 		//_delay_ms(10);

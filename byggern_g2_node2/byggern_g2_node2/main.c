@@ -63,7 +63,8 @@ int16_t posref = 0;
 int16_t k_p = 3;
 int16_t k_i = 1;
 // T = 100ms
-
+volatile uint8_t solenoid_on = 0;
+volatile uint8_t solenoid_loopcounter = 0;
 void TC3_Handler(void) {
 	
 	
@@ -81,6 +82,15 @@ void TC3_Handler(void) {
 		pwm_set_duty(20000);
 	}
 	
+	
+	if(solenoid_on == 1){
+		solenoid_loopcounter += 1;
+	}
+	if((solenoid_on == 1) && (solenoid_loopcounter > 5)){
+		solenoid_on = 0;
+		solenoid_loopcounter = 0;
+		PIOB->PIO_CODR = (1u << 14);  // LOW
+	}
 	
 	//printf("Referanse: %d\n", posref);
 	//printf("Error: %d \n", error);
@@ -106,7 +116,7 @@ int main(void)
 	timer3_init();
 	
 	
-	//Ordne pinne B14 som styringssignal til solenoide:
+	//Ordne pinne B14 (D53) som styringssignal til solenoide:
 	// Enable PCIO clock
 	PMC->PMC_PCER0 = (1u << ID_PIOB);
 
@@ -114,8 +124,9 @@ int main(void)
 	PIOB->PIO_OER = (1u << 14);
 	
 	//Styre solenoide
-	PIOB->PIO_SODR = (1u << 14);  // HIGH
-	PIOB->PIO_CODR = (1u << 14);  // LOW
+	//PIOB->PIO_SODR = (1u << 14);  // HIGH (solenoide på)
+	//PIOB->PIO_CODR = (1u << 14);  // LOW (solenoide av)
+	
 	
 	
 	// Enable PCIO clock
@@ -239,10 +250,32 @@ int main(void)
 			
 			
 			//printf("Data 1: %d\n", (int8_t)received_msg.byte[0]);
-			
+			if(received_msg.id == 0x0003){
+				//Joystick knapp trykket
+				servopos = (int16_t)(servopos - 2*(int8_t)received_msg.byte[0]);
+				// printf("Data 1: %d\n", (int16_t)received_msg.byte[0]);
+				if(servopos > 2100){
+					servopos = 2100;
+					}else if(servopos < 900){
+					servopos = 900;
+				}
+				servo_pwm_set_duty(servopos);
+				
+				//touchpad
+				posref = (int16_t)(((int8_t)received_msg.byte[4])*(-1)+100)*10;
+				
+				//printf("%d",received_msg.byte[2]);
+				if(received_msg.byte[2]==1){
+					PIOB->PIO_SODR = (1u << 14);
+					solenoid_on = 1;
+				}
+				
+				//PIOB->PIO_SODR = (1u << 14);  // HIGH (solenoide på)
+			}	
 			if(received_msg.id == 0x0005){
+				//Joystick posisjon fra node 1
+				
 				// printf("Servopos: %d\n", servopos);
-				//Meldingen har id som hører til joystickposisjon
 				servopos = (int16_t)(servopos - 2*(int8_t)received_msg.byte[0]);
 				// printf("Data 1: %d\n", (int16_t)received_msg.byte[0]);
 				if(servopos > 2100){
@@ -252,8 +285,9 @@ int main(void)
 				}
 				servo_pwm_set_duty(servopos);
 			}
-			
 			if(received_msg.id == 0x0006){
+				//Touchpad posisjon fra node 1
+				
 				//printf("Touchpad posisjon x: %d \n", (int8_t)received_msg.byte[1]);
 				posref = (int16_t)(((int8_t)received_msg.byte[1])*(-1)+100)*10;
 				//posref = (int8_t)received_msg.byte[1];
@@ -263,7 +297,7 @@ int main(void)
 		}
 		if(adc_down_flag){
 			CanMsg goal = {.id = 4, .length = 1, .byte[0]=1};
-			//can_tx(goal);
+			can_tx(goal);
 			adc_down_flag = 0;
 		}
 		if(adc_up_flag){
