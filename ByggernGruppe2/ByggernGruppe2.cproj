@@ -156,6 +156,9 @@
     <Compile Include="adc.h">
       <SubType>compile</SubType>
     </Compile>
+    <Compile Include="animation.h">
+      <SubType>compile</SubType>
+    </Compile>
     <Compile Include="CAN_driver.c">
       <SubType>compile</SubType>
     </Compile>
@@ -190,6 +193,12 @@
       <SubType>compile</SubType>
     </Compile>
     <Compile Include="MCP2515_driver.h">
+      <SubType>compile</SubType>
+    </Compile>
+    <Compile Include="menus.c">
+      <SubType>compile</SubType>
+    </Compile>
+    <Compile Include="menus.h">
       <SubType>compile</SubType>
     </Compile>
     <Compile Include="OLED_driver.c">

@@ -25,6 +25,8 @@ COM3 serial port
 #include "IO_board.h"
 #include "CAN_driver.h"
 #include "MCP2515_driver.h"
+#include "menus.h"
+//#include "animation.h"
 
 #define FOSC 4915200UL// Clock Speed
 
@@ -46,8 +48,11 @@ COM3 serial port
 	////Skru av interrupt midlertidig
 	//GICR &= ~(1 << INT0);
 //}
+// Kommentar
 volatile int8_t CAN_r0 = 0;
 volatile int8_t CAN_r1 = 0;
+
+// Kommentar
 volatile CAN_message CAN_r0_msg;
 volatile CAN_message CAN_r1_msg;
 ISR(INT0_vect) {
@@ -70,19 +75,20 @@ ISR(INT0_vect) {
 	}
 }
 
-
-volatile int8_t knapp_trykket = 0;
+// Kommentar
+volatile int8_t joystick_pressed = 0;
 ISR(INT2_vect) {
 	
 	// Kode som kjøres når Timer0 feiler/trigger
-	knapp_trykket = 1;
+	joystick_pressed = 1;
 	//Skru av interrupt	
 	GICR &= ~(1 << INT2);
 
 	timer0_init();
 }
 
-volatile int8_t loops=0;
+// Kommentar
+volatile int8_t loops = 0;
 ISR(TIMER0_COMP_vect){
 	if(loops <8){
 		loops+=1;
@@ -99,6 +105,16 @@ ISR(TIMER0_COMP_vect){
 		//printf("Timer ferdig");
 	}
 }
+
+// game_state: forteller hvilket state spillet er i
+// states:
+// 0: meny
+// 1: spill 1
+// 2: animation on oled
+// 3: game over
+volatile int8_t high_score = 0;
+volatile int8_t current_score = 0;
+volatile int8_t game_state = 0;
 
 int main(void)
 {
@@ -119,36 +135,9 @@ int main(void)
 	
 	OLED_goto_column(0);
 	OLED_goto_line(0);
-	//const char test[] = "Det funker!!TESTEST";
-	//OLED_print(test, sizeof(test)/sizeof(test[0])-1);
-	
 	OLED_clear_line(1);
 	
-	
-	 Menu main_menu;
-	 
-	 Menu sub_menu1;
-	 sub_menu1.title = "Hovedmenytest";
-	 sub_menu1.num_items = 4;
-	 sub_menu1.parent_menu = NULL;
-	 sub_menu1.position = 0;
-	 MenuItem item11 = {.text = "* Valg 1", .child_menu = &sub_menu1};
-	 sub_menu1.items[0] = item11;
-	 MenuItem item22 = {.text = "* Tilbake", .child_menu = &main_menu};
-	 sub_menu1.items[1] = item22;
-
-
-	 main_menu.title = "Hovedmeny";
-	 main_menu.num_items = 4;
-	 main_menu.parent_menu = NULL;
-	 main_menu.position = 0;
-	 MenuItem item1 = {.text = "* Valg 1", .child_menu = &sub_menu1};
-	 main_menu.items[0] = item1;
-	 MenuItem item2 = {.text = "* Valg 2", .child_menu = &sub_menu1};
-	 main_menu.items[1] = item2;
-		
-		
-	Menu* current_menu = &main_menu;
+	init_menus();
 	
 	//SRAM_test();
 	//uart_transmit(uart_recieve());
@@ -162,127 +151,83 @@ int main(void)
 	
 	CAN_init();
 	_delay_ms(100);
-
-	
-	
-
-	
-	//CAN_message test_message;
-	//test_message.id = 0x0AAA;
-	//test_message.length = 2;
-	//test_message.data[0] = 0xAB;
-	//test_message.data[1] = 0x11;
-	//CAN_transmit(test_message.id, test_message.data, test_message.length);
-	
-	//_delay_ms(2000); //Teste med tid for å sende melding
-	//
-	//CAN_message received = CAN_read(0);
-	//printf("%d",received.data[0]);
-	//uint16_t id = 0;
 	printf("Starting node 1: \n");
 	
-	CAN_message test;
-	test.id = 1234;
-	test.data[0] = 5;
-	test.data[1] = 7;
-	test.length = 2;
-	CAN_transmit(test);
-	
-	uint16_t id = 1;
-	
-	
-	uint16_t goals = 0;
+	int8_t goals = 0;
 	while(1){
-		id += 1;
-		test.data[1] += 1;
+		
 		new_direction = joy_dir_read(joy_diff);
 		if(direction!=new_direction){
 			if(new_direction == UP && current_menu->position>0){
 				current_menu->position -= 1;
-			}else if(new_direction == DOWN && current_menu->position<current_menu->num_items){
+				}else if(new_direction == DOWN && current_menu->position<current_menu->num_items){
 				current_menu->position += 1;
 			}
 		}
 		direction = new_direction;
 		OLED_print_menu(*current_menu);
 		
+		if(current_menu->title == "spill"){
+			// spill logikk -> game over
+			controls_send(joy_pos_read(joy_diff), touchpad_read(), joystick_pressed);
+			if(joystick_pressed == 1){
+				goals = goals - 1;
+			}
+			
+			if(goals >= 1){
+				current_menu = &sub_menu3;
+				goals = 0;
+			}
+			
+			
+		}else if (game_state == 1){
+			// meny logikk -> spill/animasjon
+		}else if (game_state == 2){
+			// animasjonsvindu logikk () -> meny
+		}else{
+			// game over (tid) -> meny/spill
+		}
 		
-		char data[2] = {1,2};
-		//CAN_transmit(id,data,2);
-		//printf("test");
-
+		
+		//OLED_goto_column(0);
+		//OLED_goto_line(0);
+		////OLED_reset();
+		//PORTB |= (1<<PB0);
+		//for(uint8_t i = 0; i < 128; i++){
+			//for(uint8_t u = 0; u < 8; u++){
+				//spi_mastertransmit(pgm_read_byte(&frame0[i][u]), OLED);
+			//}
+		//}
+		
+		
 		//Behandlig av flagg satt av interrupts:
 		//Reaksjon på trykking av knapp
 		
-		
-		
-		
-		volatile CAN_message send_pos;
-		send_pos.id = 0x0003;
-		send_pos.length = 5;
-		
-		joy_pos stick = joy_pos_read(joy_diff);
-		send_pos.data[0] = stick.x;
-		send_pos.data[1] = stick.y;
-		
-		send_pos.data[2] = 0;
-		
-		joy_pos pad = touchpad_read();
-		send_pos.data[3] = pad.x;
-		send_pos.data[4] = pad.y;
-		
-		if (knapp_trykket) {
-			printf("sender solenoidemelding");
-			joy_send(joy_pos_read(joy_diff), 0x0008);
-			
-			knapp_trykket = 0; 
+		if (joystick_pressed) {		
+			joystick_pressed = 0; 
 			OLED_reset();
 			current_menu = (current_menu->items[current_menu->position].child_menu);
-			
-			send_pos.data[2] = 1;
-			
-			
-			//CAN_message msg = {.id = 0x0004, .length = 1, .data[0] = 0xaa};
-			
-			
-			//CAN_transmit(msg);
 		}
+	
 		
-		
-		printf("%d",send_pos.data[2]);
-		CAN_transmit(send_pos);
-		//joy_send(touchpad_read(), 0x0006);
-		//joy_send(joy_pos_read(joy_diff), 0x0005);
-		
-		
-		
-		
-		//_delay_ms(10);
 		
 		if (CAN_r0) {
 			CAN_r0 = 0;
-			//printf("Mottatt melding på kanal 0 med id: %d\n", CAN_r0_msg.id);
-			
+			// Mottatt melding på kanal 0
 			if(CAN_r0_msg.id == 4){
 				goals += 1;
 			}
 			printf("Goals: %d \n", goals);
-			
 		}
 		if (CAN_r1) {
 			CAN_r1 = 0;
-			//printf("Mottatt melding på kanal 1 med id: %d\n", CAN_r1_msg.id);
-			
+			//Mottatt melding på kanal 1
 			if(CAN_r0_msg.id == 4){
 				goals += 1;
 			}
 			printf("Goals: %d \n", goals);
 		}
-		
 	}
-	
-	
-	
 	return 0;                                                                                                                                                                                                                                  
 }
 

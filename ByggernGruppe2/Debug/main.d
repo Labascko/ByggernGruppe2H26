@@ -19,7 +19,7 @@ main.d main.o: .././main.c \
  c:\program\ files\ (x86)\atmel\studio\7.0\toolchain\avr8\avr8-gnu-toolchain\avr\include\math.h \
  .././uartdriver.h .././xmem_driver.h .././sram_test.h .././clock_gen.h \
  .././adc.h .././joystick.h .././spi_driver.h .././OLED_driver.h \
- .././IO_board.h .././CAN_driver.h .././MCP2515_driver.h
+ .././IO_board.h .././CAN_driver.h .././MCP2515_driver.h .././menus.h
 
 c:\program\ files\ (x86)\atmel\studio\7.0\toolchain\avr8\avr8-gnu-toolchain\avr\include\avr\io.h:
 
@@ -78,3 +78,5 @@ c:\program\ files\ (x86)\atmel\studio\7.0\toolchain\avr8\avr8-gnu-toolchain\avr\
 .././CAN_driver.h:
 
 .././MCP2515_driver.h:
+
+.././menus.h:

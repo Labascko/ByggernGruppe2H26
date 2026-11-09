@@ -16,6 +16,8 @@ main.c
 
 MCP2515_driver.c
 
+menus.c
+
 OLED_driver.c
 
 spi_driver.c

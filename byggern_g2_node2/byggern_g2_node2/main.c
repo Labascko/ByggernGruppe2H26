@@ -70,6 +70,12 @@ void TC3_Handler(void) {
 	
 	if(abs(error)>150){
 		error_integral += error;
+		if (error_integral>2000){
+			error_integral =2000;
+		}else if(error_integral<-2000){
+			error_integral = -2000;
+		}
+		
 		int16_t input = k_p  * error + k_i * error_integral/5;
 		if(input<0){
 			PIOC->PIO_SODR = (1u << 23);  // HIGH motorretning

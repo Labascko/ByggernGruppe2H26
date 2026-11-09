@@ -57,8 +57,13 @@ Allocating common symbols
 Common symbol       size              file
 
 CAN_r0_msg          0xb               main.o
+sub_menu2           0x1a              menus.o
+current_menu        0x2               menus.o
 __brkval            0x2               c:/program files (x86)/atmel/studio/7.0/toolchain/avr8/avr8-gnu-toolchain/bin/../lib/gcc/avr/5.4.0/../../../../avr/lib/avr5\libc.a(malloc.o)
+sub_menu3           0x1a              menus.o
 CAN_r1_msg          0xb               main.o
+main_menu           0x1a              menus.o
+sub_menu1           0x1a              menus.o
 __flp               0x2               c:/program files (x86)/atmel/studio/7.0/toolchain/avr8/avr8-gnu-toolchain/bin/../lib/gcc/avr/5.4.0/../../../../avr/lib/avr5\libc.a(malloc.o)
 __iob               0x6               c:/program files (x86)/atmel/studio/7.0/toolchain/avr8/avr8-gnu-toolchain/bin/../lib/gcc/avr/5.4.0/../../../../avr/lib/avr5\libc.a(iob.o)
 
@@ -93,14 +98,23 @@ Discarded input sections
  .text          0x00000000        0x0 joystick.o
  .data          0x00000000        0x0 joystick.o
  .bss           0x00000000        0x0 joystick.o
+ .text.joy_send
+                0x00000000       0x50 joystick.o
  .text          0x00000000        0x0 main.o
  .data          0x00000000        0x0 main.o
  .bss           0x00000000        0x0 main.o
+ .bss.current_score
+                0x00000000        0x1 main.o
+ .bss.high_score
+                0x00000000        0x1 main.o
  .text          0x00000000        0x0 MCP2515_driver.o
  .data          0x00000000        0x0 MCP2515_driver.o
  .bss           0x00000000        0x0 MCP2515_driver.o
  .text.MCP2515_read_status
                 0x00000000       0x1e MCP2515_driver.o
+ .text          0x00000000        0x0 menus.o
+ .data          0x00000000        0x0 menus.o
+ .bss           0x00000000        0x0 menus.o
  .text          0x00000000        0x0 OLED_driver.o
  .data          0x00000000        0x0 OLED_driver.o
  .bss           0x00000000        0x0 OLED_driver.o
@@ -411,6 +425,7 @@ LOAD IO_board.o
 LOAD joystick.o
 LOAD main.o
 LOAD MCP2515_driver.o
+LOAD menus.o
 LOAD OLED_driver.o
 LOAD spi_driver.o
 LOAD sram_test.o
@@ -639,43 +654,46 @@ END GROUP
                 0x000006b2       0x28 joystick.o
                 0x000006b2                joy_calibrate_auto
  .text.joy_pos_read
-                0x000006da       0x76 joystick.o
+                0x000006da       0x86 joystick.o
                 0x000006da                joy_pos_read
  .text.joy_dir_read
-                0x00000750       0x5c joystick.o
-                0x00000750                joy_dir_read
+                0x00000760       0x5c joystick.o
+                0x00000760                joy_dir_read
  .text.touchpad_read
-                0x000007ac       0x5a joystick.o
-                0x000007ac                touchpad_read
- .text.joy_send
-                0x00000806       0x50 joystick.o
-                0x00000806                joy_send
+                0x000007bc       0x5a joystick.o
+                0x000007bc                touchpad_read
+ .text.controls_send
+                0x00000816       0x66 joystick.o
+                0x00000816                controls_send
  .text.__vector_1
-                0x00000856       0xda main.o
-                0x00000856                __vector_1
+                0x0000087c       0xda main.o
+                0x0000087c                __vector_1
  .text.__vector_3
-                0x00000930       0x54 main.o
-                0x00000930                __vector_3
+                0x00000956       0x54 main.o
+                0x00000956                __vector_3
  .text.__vector_16
-                0x00000984       0x44 main.o
-                0x00000984                __vector_16
- .text.main     0x000009c8      0x320 main.o
-                0x000009c8                main
+                0x000009aa       0x44 main.o
+                0x000009aa                __vector_16
+ .text.main     0x000009ee      0x226 main.o
+                0x000009ee                main
  .text.MCP2515_spi_read
-                0x00000ce8       0x28 MCP2515_driver.o
-                0x00000ce8                MCP2515_spi_read
+                0x00000c14       0x28 MCP2515_driver.o
+                0x00000c14                MCP2515_spi_read
  .text.MCP2515_spi_write
-                0x00000d10       0x2c MCP2515_driver.o
-                0x00000d10                MCP2515_spi_write
+                0x00000c3c       0x2c MCP2515_driver.o
+                0x00000c3c                MCP2515_spi_write
  .text.MCP2515_bit_modify
-                0x00000d3c       0x3a MCP2515_driver.o
-                0x00000d3c                MCP2515_bit_modify
+                0x00000c68       0x3a MCP2515_driver.o
+                0x00000c68                MCP2515_bit_modify
  .text.MCP2515_reset
-                0x00000d76       0x10 MCP2515_driver.o
-                0x00000d76                MCP2515_reset
+                0x00000ca2       0x10 MCP2515_driver.o
+                0x00000ca2                MCP2515_reset
  .text.MCP2515_RTS
-                0x00000d86       0x14 MCP2515_driver.o
-                0x00000d86                MCP2515_RTS
+                0x00000cb2       0x14 MCP2515_driver.o
+                0x00000cb2                MCP2515_RTS
+ .text.init_menus
+                0x00000cc6       0xd4 menus.o
+                0x00000cc6                init_menus
  .text.OLED_init
                 0x00000d9a       0x30 OLED_driver.o
                 0x00000d9a                OLED_init
@@ -798,7 +816,7 @@ END GROUP
  *(.fini0)
                 0x00001a9a                _etext = .
 
-.data           0x00800100       0x74 load address 0x00001a9a
+.data           0x00800100       0x96 load address 0x00001a9a
                 0x00800100                PROVIDE (__data_start, .)
  *(.data)
  .data          0x00800100        0x6 c:/program files (x86)/atmel/studio/7.0/toolchain/avr8/avr8-gnu-toolchain/bin/../lib/gcc/avr/5.4.0/../../../../avr/lib/avr5\libc.a(malloc.o)
@@ -810,45 +828,58 @@ END GROUP
  *(.rodata)
  *(.rodata*)
  .rodata.str1.1
-                0x00800106       0x6d main.o
+                0x00800106       0x1e main.o
+                                 0x24 (size before relaxing)
+ .rodata.str1.1
+                0x00800124       0x71 menus.o
+                                 0x84 (size before relaxing)
  *(.gnu.linkonce.r*)
-                0x00800174                . = ALIGN (0x2)
- *fill*         0x00800173        0x1 
-                0x00800174                _edata = .
-                0x00800174                PROVIDE (__data_end, .)
+                0x00800196                . = ALIGN (0x2)
+ *fill*         0x00800195        0x1 
+                0x00800196                _edata = .
+                0x00800196                PROVIDE (__data_end, .)
 
-.bss            0x00800174       0x24
-                0x00800174                PROVIDE (__bss_start, .)
+.bss            0x00800196       0x8f
+                0x00800196                PROVIDE (__bss_start, .)
  *(.bss)
  *(.bss*)
- .bss.loops     0x00800174        0x1 main.o
-                0x00800174                loops
- .bss.knapp_trykket
-                0x00800175        0x1 main.o
-                0x00800175                knapp_trykket
- .bss.CAN_r1    0x00800176        0x1 main.o
-                0x00800176                CAN_r1
- .bss.CAN_r0    0x00800177        0x1 main.o
-                0x00800177                CAN_r0
+ .bss.game_state
+                0x00800196        0x1 main.o
+                0x00800196                game_state
+ .bss.loops     0x00800197        0x1 main.o
+                0x00800197                loops
+ .bss.joystick_pressed
+                0x00800198        0x1 main.o
+                0x00800198                joystick_pressed
+ .bss.CAN_r1    0x00800199        0x1 main.o
+                0x00800199                CAN_r1
+ .bss.CAN_r0    0x0080019a        0x1 main.o
+                0x0080019a                CAN_r0
  *(COMMON)
- COMMON         0x00800178       0x16 main.o
-                0x00800178                CAN_r0_msg
-                0x00800183                CAN_r1_msg
- COMMON         0x0080018e        0x6 c:/program files (x86)/atmel/studio/7.0/toolchain/avr8/avr8-gnu-toolchain/bin/../lib/gcc/avr/5.4.0/../../../../avr/lib/avr5\libc.a(iob.o)
-                0x0080018e                __iob
- COMMON         0x00800194        0x4 c:/program files (x86)/atmel/studio/7.0/toolchain/avr8/avr8-gnu-toolchain/bin/../lib/gcc/avr/5.4.0/../../../../avr/lib/avr5\libc.a(malloc.o)
-                0x00800194                __brkval
-                0x00800196                __flp
-                0x00800198                PROVIDE (__bss_end, .)
+ COMMON         0x0080019b       0x16 main.o
+                0x0080019b                CAN_r0_msg
+                0x008001a6                CAN_r1_msg
+ COMMON         0x008001b1       0x6a menus.o
+                0x008001b1                sub_menu2
+                0x008001cb                current_menu
+                0x008001cd                sub_menu3
+                0x008001e7                main_menu
+                0x00800201                sub_menu1
+ COMMON         0x0080021b        0x6 c:/program files (x86)/atmel/studio/7.0/toolchain/avr8/avr8-gnu-toolchain/bin/../lib/gcc/avr/5.4.0/../../../../avr/lib/avr5\libc.a(iob.o)
+                0x0080021b                __iob
+ COMMON         0x00800221        0x4 c:/program files (x86)/atmel/studio/7.0/toolchain/avr8/avr8-gnu-toolchain/bin/../lib/gcc/avr/5.4.0/../../../../avr/lib/avr5\libc.a(malloc.o)
+                0x00800221                __brkval
+                0x00800223                __flp
+                0x00800225                PROVIDE (__bss_end, .)
                 0x00001a9a                __data_load_start = LOADADDR (.data)
-                0x00001b0e                __data_load_end = (__data_load_start + SIZEOF (.data))
+                0x00001b30                __data_load_end = (__data_load_start + SIZEOF (.data))
 
-.noinit         0x00800198        0x0
+.noinit         0x00800225        0x0
                 [!provide]                PROVIDE (__noinit_start, .)
  *(.noinit*)
                 [!provide]                PROVIDE (__noinit_end, .)
-                0x00800198                _end = .
-                0x00800198                PROVIDE (__heap_start, .)
+                0x00800225                _end = .
+                0x00800225                PROVIDE (__heap_start, .)
 
 .eeprom         0x00810000        0x0
  *(.eeprom*)
@@ -896,6 +927,7 @@ END GROUP
  .comment       0x00000030       0x31 joystick.o
  .comment       0x00000030       0x31 main.o
  .comment       0x00000030       0x31 MCP2515_driver.o
+ .comment       0x00000030       0x31 menus.o
  .comment       0x00000030       0x31 OLED_driver.o
  .comment       0x00000030       0x31 spi_driver.o
  .comment       0x00000030       0x31 uartdriver.o
@@ -930,7 +962,7 @@ END GROUP
 .debug_sfnames
  *(.debug_sfnames)
 
-.debug_aranges  0x00000000      0x250
+.debug_aranges  0x00000000      0x278
  *(.debug_aranges)
  .debug_aranges
                 0x00000000       0x20 adc.o
@@ -939,79 +971,85 @@ END GROUP
  .debug_aranges
                 0x00000050       0x28 clock_gen.o
  .debug_aranges
-                0x00000078       0x48 joystick.o
+                0x00000078       0x50 joystick.o
  .debug_aranges
-                0x000000c0       0x38 main.o
+                0x000000c8       0x38 main.o
  .debug_aranges
-                0x000000f8       0x48 MCP2515_driver.o
+                0x00000100       0x48 MCP2515_driver.o
  .debug_aranges
-                0x00000140       0x58 OLED_driver.o
+                0x00000148       0x20 menus.o
  .debug_aranges
-                0x00000198       0x50 spi_driver.o
+                0x00000168       0x58 OLED_driver.o
  .debug_aranges
-                0x000001e8       0x38 uartdriver.o
+                0x000001c0       0x50 spi_driver.o
  .debug_aranges
-                0x00000220       0x30 xmem_driver.o
+                0x00000210       0x38 uartdriver.o
+ .debug_aranges
+                0x00000248       0x30 xmem_driver.o
 
 .debug_pubnames
  *(.debug_pubnames)
 
-.debug_info     0x00000000     0x27e7
+.debug_info     0x00000000     0x29d1
  *(.debug_info .gnu.linkonce.wi.*)
  .debug_info    0x00000000      0x5d0 C:/Program Files (x86)/Atmel/Studio/7.0/Packs/atmel/ATmega_DFP/1.7.374/gcc/dev/atmega162/avr5/crtatmega162.o
  .debug_info    0x000005d0       0xde adc.o
  .debug_info    0x000006ae      0x512 CAN_driver.o
  .debug_info    0x00000bc0       0xab clock_gen.o
- .debug_info    0x00000c6b      0x350 joystick.o
- .debug_info    0x00000fbb      0x832 main.o
- .debug_info    0x000017ed      0x39d MCP2515_driver.o
- .debug_info    0x00001b8a      0x717 OLED_driver.o
- .debug_info    0x000022a1      0x21c spi_driver.o
- .debug_info    0x000024bd      0x1ff uartdriver.o
- .debug_info    0x000026bc      0x12b xmem_driver.o
+ .debug_info    0x00000c6b      0x3b4 joystick.o
+ .debug_info    0x0000101f      0x78b main.o
+ .debug_info    0x000017aa      0x39d MCP2515_driver.o
+ .debug_info    0x00001b47      0x22d menus.o
+ .debug_info    0x00001d74      0x717 OLED_driver.o
+ .debug_info    0x0000248b      0x21c spi_driver.o
+ .debug_info    0x000026a7      0x1ff uartdriver.o
+ .debug_info    0x000028a6      0x12b xmem_driver.o
 
-.debug_abbrev   0x00000000     0x1204
+.debug_abbrev   0x00000000     0x12c2
  *(.debug_abbrev)
  .debug_abbrev  0x00000000      0x580 C:/Program Files (x86)/Atmel/Studio/7.0/Packs/atmel/ATmega_DFP/1.7.374/gcc/dev/atmega162/avr5/crtatmega162.o
  .debug_abbrev  0x00000580       0xaa adc.o
  .debug_abbrev  0x0000062a      0x1ab CAN_driver.o
  .debug_abbrev  0x000007d5       0x51 clock_gen.o
- .debug_abbrev  0x00000826      0x1c4 joystick.o
- .debug_abbrev  0x000009ea      0x227 main.o
- .debug_abbrev  0x00000c11       0xfe MCP2515_driver.o
- .debug_abbrev  0x00000d0f      0x19e OLED_driver.o
- .debug_abbrev  0x00000ead      0x13f spi_driver.o
- .debug_abbrev  0x00000fec      0x147 uartdriver.o
- .debug_abbrev  0x00001133       0xd1 xmem_driver.o
+ .debug_abbrev  0x00000826      0x1cb joystick.o
+ .debug_abbrev  0x000009f1      0x21e main.o
+ .debug_abbrev  0x00000c0f       0xfe MCP2515_driver.o
+ .debug_abbrev  0x00000d0d       0xc0 menus.o
+ .debug_abbrev  0x00000dcd      0x19e OLED_driver.o
+ .debug_abbrev  0x00000f6b      0x13f spi_driver.o
+ .debug_abbrev  0x000010aa      0x147 uartdriver.o
+ .debug_abbrev  0x000011f1       0xd1 xmem_driver.o
 
-.debug_line     0x00000000     0x1460
+.debug_line     0x00000000     0x1599
  *(.debug_line .debug_line.* .debug_line_end)
  .debug_line    0x00000000      0x140 C:/Program Files (x86)/Atmel/Studio/7.0/Packs/atmel/ATmega_DFP/1.7.374/gcc/dev/atmega162/avr5/crtatmega162.o
  .debug_line    0x00000140       0xcc adc.o
  .debug_line    0x0000020c      0x2c4 CAN_driver.o
  .debug_line    0x000004d0       0xe0 clock_gen.o
- .debug_line    0x000005b0      0x204 joystick.o
- .debug_line    0x000007b4      0x45c main.o
- .debug_line    0x00000c10      0x19b MCP2515_driver.o
- .debug_line    0x00000dab      0x300 OLED_driver.o
- .debug_line    0x000010ab      0x1b1 spi_driver.o
- .debug_line    0x0000125c      0x126 uartdriver.o
- .debug_line    0x00001382       0xde xmem_driver.o
+ .debug_line    0x000005b0      0x263 joystick.o
+ .debug_line    0x00000813      0x3c3 main.o
+ .debug_line    0x00000bd6      0x19b MCP2515_driver.o
+ .debug_line    0x00000d71      0x173 menus.o
+ .debug_line    0x00000ee4      0x300 OLED_driver.o
+ .debug_line    0x000011e4      0x1b1 spi_driver.o
+ .debug_line    0x00001395      0x126 uartdriver.o
+ .debug_line    0x000014bb       0xde xmem_driver.o
 
-.debug_frame    0x00000000      0x5f8
+.debug_frame    0x00000000      0x650
  *(.debug_frame)
  .debug_frame   0x00000000       0x24 adc.o
  .debug_frame   0x00000024       0xa8 CAN_driver.o
  .debug_frame   0x000000cc       0x34 clock_gen.o
- .debug_frame   0x00000100       0xc8 joystick.o
- .debug_frame   0x000001c8      0x118 main.o
- .debug_frame   0x000002e0       0xa0 MCP2515_driver.o
- .debug_frame   0x00000380      0x130 OLED_driver.o
- .debug_frame   0x000004b0       0xb0 spi_driver.o
- .debug_frame   0x00000560       0x54 uartdriver.o
- .debug_frame   0x000005b4       0x44 xmem_driver.o
+ .debug_frame   0x00000100       0xfc joystick.o
+ .debug_frame   0x000001fc      0x118 main.o
+ .debug_frame   0x00000314       0xa0 MCP2515_driver.o
+ .debug_frame   0x000003b4       0x24 menus.o
+ .debug_frame   0x000003d8      0x130 OLED_driver.o
+ .debug_frame   0x00000508       0xb0 spi_driver.o
+ .debug_frame   0x000005b8       0x54 uartdriver.o
+ .debug_frame   0x0000060c       0x44 xmem_driver.o
 
-.debug_str      0x00000000      0x8fe
+.debug_str      0x00000000      0x976
  *(.debug_str)
  .debug_str     0x00000000      0x1f6 C:/Program Files (x86)/Atmel/Studio/7.0/Packs/atmel/ATmega_DFP/1.7.374/gcc/dev/atmega162/avr5/crtatmega162.o
  .debug_str     0x000001f6      0x159 adc.o
@@ -1020,32 +1058,35 @@ END GROUP
                                 0x298 (size before relaxing)
  .debug_str     0x0000046c       0x29 clock_gen.o
                                 0x1a0 (size before relaxing)
- .debug_str     0x00000495       0x9e joystick.o
-                                0x258 (size before relaxing)
- .debug_str     0x00000533      0x1b1 main.o
-                                0x499 (size before relaxing)
- .debug_str     0x000006e4       0x7a MCP2515_driver.o
+ .debug_str     0x00000495       0xb2 joystick.o
+                                0x274 (size before relaxing)
+ .debug_str     0x00000547      0x1b4 main.o
+                                0x48b (size before relaxing)
+ .debug_str     0x000006fb       0x7a MCP2515_driver.o
                                 0x244 (size before relaxing)
- .debug_str     0x0000075e       0x5d OLED_driver.o
+ .debug_str     0x00000775       0x61 menus.o
+                                0x24a (size before relaxing)
+ .debug_str     0x000007d6       0x5d OLED_driver.o
                                 0x2b0 (size before relaxing)
- .debug_str     0x000007bb       0x5c spi_driver.o
+ .debug_str     0x00000833       0x5c spi_driver.o
                                 0x218 (size before relaxing)
- .debug_str     0x00000817       0xb2 uartdriver.o
+ .debug_str     0x0000088f       0xb2 uartdriver.o
                                 0x1e6 (size before relaxing)
- .debug_str     0x000008c9       0x35 xmem_driver.o
+ .debug_str     0x00000941       0x35 xmem_driver.o
                                 0x1c3 (size before relaxing)
 
-.debug_loc      0x00000000     0x142d
+.debug_loc      0x00000000     0x152f
  *(.debug_loc)
  .debug_loc     0x00000000       0x58 adc.o
  .debug_loc     0x00000058      0x2a3 CAN_driver.o
- .debug_loc     0x000002fb      0x295 joystick.o
- .debug_loc     0x00000590      0x449 main.o
- .debug_loc     0x000009d9      0x238 MCP2515_driver.o
- .debug_loc     0x00000c11      0x57c OLED_driver.o
- .debug_loc     0x0000118d      0x1ff spi_driver.o
- .debug_loc     0x0000138c       0x6d uartdriver.o
- .debug_loc     0x000013f9       0x34 xmem_driver.o
+ .debug_loc     0x000002fb      0x361 joystick.o
+ .debug_loc     0x0000065c      0x38f main.o
+ .debug_loc     0x000009eb      0x238 MCP2515_driver.o
+ .debug_loc     0x00000c23       0xf0 menus.o
+ .debug_loc     0x00000d13      0x57c OLED_driver.o
+ .debug_loc     0x0000128f      0x1ff spi_driver.o
+ .debug_loc     0x0000148e       0x6d uartdriver.o
+ .debug_loc     0x000014fb       0x34 xmem_driver.o
 
 .debug_macinfo
  *(.debug_macinfo)
@@ -1065,18 +1106,19 @@ END GROUP
 .debug_pubtypes
  *(.debug_pubtypes)
 
-.debug_ranges   0x00000000      0x1f8
+.debug_ranges   0x00000000      0x210
  *(.debug_ranges)
  .debug_ranges  0x00000000       0x10 adc.o
  .debug_ranges  0x00000010       0x20 CAN_driver.o
  .debug_ranges  0x00000030       0x18 clock_gen.o
- .debug_ranges  0x00000048       0x38 joystick.o
- .debug_ranges  0x00000080       0x28 main.o
- .debug_ranges  0x000000a8       0x38 MCP2515_driver.o
- .debug_ranges  0x000000e0       0x90 OLED_driver.o
- .debug_ranges  0x00000170       0x40 spi_driver.o
- .debug_ranges  0x000001b0       0x28 uartdriver.o
- .debug_ranges  0x000001d8       0x20 xmem_driver.o
+ .debug_ranges  0x00000048       0x40 joystick.o
+ .debug_ranges  0x00000088       0x28 main.o
+ .debug_ranges  0x000000b0       0x38 MCP2515_driver.o
+ .debug_ranges  0x000000e8       0x10 menus.o
+ .debug_ranges  0x000000f8       0x90 OLED_driver.o
+ .debug_ranges  0x00000188       0x40 spi_driver.o
+ .debug_ranges  0x000001c8       0x28 uartdriver.o
+ .debug_ranges  0x000001f0       0x20 xmem_driver.o
 
 .debug_macro
  *(.debug_macro)

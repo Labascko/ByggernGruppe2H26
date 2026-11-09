@@ -47,6 +47,7 @@ void init_joy_b(void);
 joy_pos touchpad_read(void);
 joy_dir joy_dir_read(joy_pos diff);
 void joy_send(joy_pos pos, uint16_t id);
+void controls_send(joy_pos stick, joy_pos pad, uint8_t pressed);
 
 
 #endif /* JOYSTICK_H_ */
