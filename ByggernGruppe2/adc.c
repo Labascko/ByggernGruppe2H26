@@ -8,15 +8,15 @@
 #include <stdio.h>
 
 uint8_t adc_read(uint8_t channel){
-	volatile uint8_t * adc = (uint8_t *) 0x1000;
-	adc[0] = 0x00; //
-	//for(volatile int i= 0; i<100; i++){}
+	//Sett startadresse for å ADC
+	volatile uint8_t * adc = (uint8_t *) 0x1000; 
+	adc[0] = 0x00; // Start konvertering
+	
 	uint8_t ret_val;
+	//ADC-en er laget slik at man leser n ganger for å få verdi fra kanal n
 	for(int i=0; i<=channel; i++){
 		ret_val = adc[0];
 	}
 	
-	//ret_val = adc[0];
-	//printf("ADC-verdi: %02X\n", ret_val);
 	return ret_val;
 }

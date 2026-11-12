@@ -9,8 +9,9 @@
 #ifndef ANIMATION_H_
 #define ANIMATION_H_
 
-#include <avr/pgmspace.h>
 
+//Test for å implementere en GIF som kan skrives til skjermen. Data hentet fra nett.
+#include <avr/pgmspace.h>
 const uint8_t PROGMEM frame0[128][8] = {
 	{ 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00 },
 	{ 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00 },

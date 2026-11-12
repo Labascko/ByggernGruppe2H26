@@ -14,6 +14,7 @@
 #include "spi_driver.h"
 
 void CAN_init(void){
+	//Reset can-kontroller ved oppstart
 	MCP2515_reset();
 	_delay_ms(10);
 	
@@ -21,7 +22,7 @@ void CAN_init(void){
 	MCP2515_bit_modify(0x0F, 0xE0, 0x80);
 	
 	//Timing som skal gi 250kB/s. 
-	//Baud Rate Prescaler. Dele på 2
+	//Baud Rate Prescaler. Dele pï¿½ 2
 	MCP2515_bit_modify(0x2A, 0x3F, 2-1);
 	//7 T_Q enheter som "gis" til propagation time
 	MCP2515_bit_modify(0x29, 0x07, 7-1);
@@ -33,55 +34,47 @@ void CAN_init(void){
 	MCP2515_bit_modify(0x28, 0x07, 4-1);
 	
 	
-	// Sett RXB0 til å ta imot ALLE meldinger (skru av filtere) + aktiver Rollover (BUKT=1)
+	// Sett RXB0 til ï¿½ ta imot ALLE meldinger (skru av filtere) + aktiver Rollover (BUKT=1)
 	//MCP2515_bit_modify(0x60, 0x64, 0x64);
-	// Sett RXB0 til å ta imot ALLE meldinger (skru av filtere) + UTEN Rollover (BUKT=0)
+	// Sett RXB0 til ï¿½ ta imot ALLE meldinger (skru av filtere) + UTEN Rollover (BUKT=0)
 	MCP2515_bit_modify(0x60, 0x60, 0x60);
 
-	// Sett RXB1 til å ta imot ALLE meldinger
+	// Sett RXB1 til ï¿½ ta imot ALLE meldinger
 	MCP2515_bit_modify(0x70, 0x60, 0x60);
 	
-	
-	//skru på interrupts på RX0 og RX1
+	//skru pï¿½ interrupts pï¿½ RX0 og RX1
 	MCP2515_bit_modify(0x2B, 0x03, 0x03);
 	
-	//Skru på AVR sin INT0
+	//Skru pï¿½ AVR sin INT0
 	GICR |= (1 << INT0);
 	
-	//set loopback mode
+	//sett i loopback mode (Ble brukt for Ã¥ teste)
 	//MCP2515_bit_modify(0x0F, 0xE0, 0x40);
-	
 	//_delay_ms(10);
-	//set Normal mode
+
+	//sett i Normal mode
 	MCP2515_bit_modify(0x0F, 0xE0, 0x00);
 	
 }
 
 uint8_t CAN_transmit(CAN_message message){
-	//Prior to sending the message, the MCU must initialize the CANINTE.TXInE bit to enable or disable the generation of an interrupt when the message is sent.
-	
-	//The TXBnCTRL.TXREQ bit must be clear (indicating the transmit buffer is not pending transmission) before writing to the transmit buffer.
-	
 	uint16_t tx_base = 0x00;
 	
-	//high inneholder 8 mest signifikante, low inneholder 3 minst signifikante øverst
+	//high inneholder 8 mest signifikante, low inneholder 3 minst signifikante ï¿½verst, fordi CAN bruker 11-bits ID
 	uint8_t id_low = (uint8_t)((message.id&0x07)<<5);
 	uint8_t id_high = (uint8_t)(message.id >> 3);
 	
 	if(!(MCP2515_spi_read(0x30)&(1<<3))){
 		//Buffer 0 klar for ny melding
 		tx_base = 0x30;
-		//printf("1");
 	}else if(!(MCP2515_spi_read(0x40)&(1<<3))){
 		//Buffer 1 klar for ny melding
 		tx_base = 0x40;
-		//printf("2");
 	}else if(!(MCP2515_spi_read(0x50)&(1<<3))){
 		//Buffer 2 klar for ny melding
 		tx_base = 0x50;
-		//printf("3");
 	}else{
-		//printf("feilet");
+		//Ingen kanaler ledige, returner 0 for Ã¥ indikere at funksjonen feilet
 		return 0;
 	}
 	
@@ -100,9 +93,7 @@ uint8_t CAN_transmit(CAN_message message){
 		MCP2515_spi_write(tx_base+6+i, message.data[i]);
 	}
 	
-	//Skru på request to send
-	//MCP2515_bit_modify(tx_base,0x08,0x08);
-	
+	//Skru pÃ¥ request to send pÃ¥ fitt kanal
 	if(tx_base == 0x30) {
 		MCP2515_RTS(0x01);
 	} else if(tx_base == 0x40) {
@@ -124,24 +115,25 @@ CAN_message CAN_read(uint8_t buffer){
 		//Les fra buffer 1 
 		rx_base = 0x70;
 	}else{
+		//Ugyldig verdi for buffer sendti inn, returnerer tom melding
 		CAN_message empty = {0,0};
 		return empty;
 	}
 	
 	CAN_message message;
-	//Les id
+	//Les id (med shift fordi id er 11 bit lang)
 	message.id = (MCP2515_spi_read(rx_base+1)<<3);	
 	message.id |= (MCP2515_spi_read(rx_base+2)>>5);
 	
 	message.length = MCP2515_spi_read(rx_base+5);
 	for(uint8_t i=0; i<message.length; i++){
 		if(i>7){
+			// kutt loopen om message.length feilaktig har fÃ¥tt en verdi stÃ¸rre en CAN-meldingene kan inneholde
 			break;
 		}
+		//legg til data i melding
 		message.data[i] = MCP2515_spi_read(rx_base+6+i);
 	}
-	
-	
-	
+
 	return message;
 }

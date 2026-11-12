@@ -15,13 +15,18 @@
 
 
 void init_joy_b(void){
+	//Sett PE0 som input
 	DDRE &= ~(1 << PE0);
+	//Skru på intern Pull-up motstand
 	PORTE |= (1 << PE0);
+	//Sett interrupt til å reagere på fallende flanke
 	EMCUCR &= ~(1 << ISC2);
+	//Aktiver interrupt
 	GICR |= (1 << INT2);
 }
 
 void joy_calibrate_auto(joy_pos *diff){
+	//Les foreløpige verdier fra ADC, og logg disse i en differanse som kan brukes til å motvirke offset
 	int8_t x = adc_read(0);
 	int8_t y = adc_read(1);
 	
@@ -34,8 +39,10 @@ void joy_calibrate_auto(joy_pos *diff){
 
 
 joy_pos joy_pos_read(joy_pos diff){	
+	//Les joystick-posisjon og kalibrer for konstant offset
 	joy_pos pos = {adc_read(0)+diff.x, adc_read(1)+diff.y};   
 		
+	//Omgjør x-koordinat til å havne mellom -100 og +100 (Tallverdiene for skalering kommer fra testing)
 	if(pos.x > 5){
 		pos.x = pos.x * 100/84;
 	} else if (pos.x < -5){
@@ -44,6 +51,7 @@ joy_pos joy_pos_read(joy_pos diff){
 		pos.x = 0;
 	}
 		
+	//Omgjør y-koordinat til å havne mellom -100 og +100 (Tallverdiene for skalering kommer fra testing)
 	if(pos.y > 5){
 		pos.y = pos.y * 100/86;
 	} else if(pos.y < -5){
@@ -56,8 +64,10 @@ joy_pos joy_pos_read(joy_pos diff){
 }
 
 joy_dir joy_dir_read(joy_pos diff){
+	//les joystick-posisjon
 	joy_pos pos = joy_pos_read(diff);
 	
+	//Sjekk hvilken retning posisjonen tilsvarer og returner denne. Inkludert et offset fra midten
 	if((abs(pos.x)<50) && (abs(pos.y)<50)){
 		return NEUTRAL;
 	}else if(abs(pos.x)>abs(pos.y)){
@@ -76,20 +86,24 @@ joy_dir joy_dir_read(joy_pos diff){
 }
 
 joy_pos touchpad_read(void){
+	//Les touchpad posisjon fra ADC og returner denne
 	joy_pos pos = {(adc_read(2)-0x80)*100/127, (adc_read(3)-0x80)*100/127};  
 	return pos;
 }
 
 void joy_send(joy_pos pos, uint16_t id){
+	//Omformuler posisjon til en CAN_message 
 	CAN_message send_pos;
 	send_pos.id = id;
 	send_pos.data[0] = pos.x;
 	send_pos.data[1] = pos.y;
 	send_pos.length = 2;
+	//Send posisjon på CAN
 	CAN_transmit(send_pos);
 }
 
 void controls_send(joy_pos stick, joy_pos pad, uint8_t pressed){
+	//Omformuler Joystick-posisjon, touchpad-posisjon og knappetrykk til en CAN_message
 	volatile CAN_message send_pos;
 	send_pos.id = 0x0003;
 	send_pos.length = 5;
@@ -98,5 +112,6 @@ void controls_send(joy_pos stick, joy_pos pad, uint8_t pressed){
 	send_pos.data[2] = pressed;
 	send_pos.data[3] = pad.x;
 	send_pos.data[4] = pad.y;
+	//Send melding
 	CAN_transmit(send_pos);
 }

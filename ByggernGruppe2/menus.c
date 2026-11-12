@@ -11,7 +11,7 @@
 #include "menus.h"
 //#include <stddef.h> // for NULL
 
-// Define the actual global variables here (only once!)
+//Definer globale variabler for menyene
 Menu main_menu;
 Menu sub_menu1;
 Menu sub_menu2;
@@ -19,7 +19,7 @@ Menu sub_menu3;
 Menu* current_menu;
 
 void init_menus(void) {
-	// sub_menu1 initialization
+	//initialiser meny 1
 	sub_menu1.title = "Instillinger";
 	sub_menu1.num_items = 2;
 	sub_menu1.parent_menu = NULL;
@@ -31,7 +31,7 @@ void init_menus(void) {
 	MenuItem item12 = {.text = "* Tilbake", .child_menu = &main_menu};
 	sub_menu1.items[1] = item12;
 	
-	// sub_menu2 initialization
+	//initialiser meny 2
 	sub_menu2.title = "spill";
 	sub_menu2.num_items = 2;
 	sub_menu2.parent_menu = NULL;
@@ -43,7 +43,7 @@ void init_menus(void) {
 	MenuItem item22 = {.text = "*pyntevalg 1", .child_menu = &sub_menu2};
 	sub_menu2.items[1] = item22;
 
-	// sub_menu3 initialization
+	//initialiser meny 3
 	sub_menu3.title = " Game over!";
 	sub_menu3.num_items = 2;
 	sub_menu3.parent_menu = NULL;
@@ -56,7 +56,7 @@ void init_menus(void) {
 	sub_menu3.items[1] = item32;
 
 
-	// main_menu initialization
+	//Initialiser hovedmeny
 	main_menu.title = "Hovedmeny";
 	main_menu.num_items = 2;
 	main_menu.parent_menu = NULL;
@@ -68,6 +68,6 @@ void init_menus(void) {
 	MenuItem item2 = {.text = "* Instillinger", .child_menu = &sub_menu1};
 	main_menu.items[1] = item2;
 
-	// Set pointer
+	//Velg startmeny
 	current_menu = &main_menu;
 }

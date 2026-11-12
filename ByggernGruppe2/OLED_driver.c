@@ -14,12 +14,11 @@
 #include "OLED_driver.h"
 
 void OLED_init(void){
-	//PB0 brukes til å styre datatype
-	//PB0 høy => pixel data, PB0 lav => kommando
-	
+	//PB0 brukes til ï¿½ styre datatype
+	//PB0 hï¿½y => pixel data, PB0 lav => kommando
 	PORTB &= ~(1<<PB0);
-	// Nødvedige kommandoer:
-	//skru på display
+	// Nï¿½dvedige kommandoer:
+	//skru pï¿½ display
 	spi_mastertransmit(0xAF, OLED);
 	
 	//Velg Addressing mode:
@@ -32,6 +31,7 @@ void OLED_init(void){
 }
 
 void OLED_goto_line(int line){
+	//Kommando
 	PORTB &= ~(1<<PB0);
 	spi_mastertransmit(0x22, OLED);
 	spi_mastertransmit(line, OLED);
@@ -39,6 +39,7 @@ void OLED_goto_line(int line){
 }
 
 void OLED_goto_column(int column){
+	//kommando
 	PORTB &= ~(1<<PB0);
 	spi_mastertransmit(0x21, OLED);
 	spi_mastertransmit(column, OLED);
@@ -46,9 +47,11 @@ void OLED_goto_column(int column){
 }
 
 void OLED_clear_line(int line){
+	//kommando
 	PORTB &= ~(1<<PB0);
 	OLED_goto_line(line);
 	OLED_goto_column(0);
+	//pixeldata
 	PORTB |= (1<<PB0);
 	for(int u=0; u<128; u++){
 		spi_mastertransmit(pgm_read_byte(&font8[0][0]), OLED);
@@ -56,14 +59,15 @@ void OLED_clear_line(int line){
 }
 
 void OLED_reset(void){
+	//Fjern alle linjer
 	for(int i=0; i<8; i++){
 		OLED_clear_line(i);
 	}
 }
 
 void OLED_print(char* string, int n){
+	//pixeldata
 	PORTB |= (1<<PB0);
-	//printf(&string[2]);
 	for(int i=0; i<n; i++){	
 		for(int u=0; u<8; u++){
 			if((int)string[i]-32 < sizeof(font8)){
@@ -76,8 +80,8 @@ void OLED_print(char* string, int n){
 }
 
 void OLED_print_inverted(char* string, int n){
+	//pixeldata (lik som funksjonen over, men invertert for bokstavene)
 	PORTB |= (1<<PB0);
-	//printf(&string[2]);
 	for(int i=0; i<n; i++){
 		for(int u=0; u<8; u++){
 			if((int)string[i]-32 < sizeof(font8)){
@@ -89,12 +93,12 @@ void OLED_print_inverted(char* string, int n){
 	}
 }
 
-
-
 void OLED_print_menu(Menu menu){
 	OLED_goto_column(0);
 	OLED_goto_line(0);
+	//Print menytittel
 	OLED_print(menu.title, strlen(menu.title));
+	//for-lÃ¸kke som printer innholdet i menyen
 	for(int i=0; i<menu.num_items; i++){
 		OLED_goto_column(10);
 		OLED_goto_line(i+1);
@@ -103,7 +107,5 @@ void OLED_print_menu(Menu menu){
 		}else{
 			OLED_print(menu.items[i].text, strlen(menu.items[i].text));
 		}
-		
 	}
-	
 }

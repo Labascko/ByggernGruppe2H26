@@ -9,37 +9,28 @@
 #include <stdio.h>
 
 void timer1_init(void){
+	//Sett PD5 som output
 	DDRD |= (1<<DDD5);
 	
+	//Automatiser "pin-toggle" ved sammenligningsverdi OCR1A
 	TCCR1A = (1<<COM1A0);
+	//Velg prescaler og modus. WGM12 => CTC-modus, CS10 => prescaler 1 (ingen deling)
 	TCCR1B = (1<<WGM12 | 1<<CS10);
 	
-	/*unsigned char sreg;
-	sreg = SREG;
-	_CLI();*/
-	
+	//Sett sammenligningsverdi
 	OCR1A = 0x0000;
-	
-	//SREG = sreg;
 }
 
 void timer0_init(void){
 	//Telleverdi 0
 	TCNT0 = 0;
-	//Velg prescaler (1024 ganger tregere)
-	//TCCR0 |= (1<<CS00)|(1<<CS02);
-	//TCCR0 &= ~(1<<CS01);
-	
-	//Velge modus (CTC):
-	//TCCR0 |= (1<<WGM01);
-	//TCCR0 &= ~(1<<WGM00);
-	//compare value
+
+	//Sett sammenligningsverdi i "Output Compare Register 0"
 	OCR0 = 255;
 	
-	//Enable overflow interrupt
+	//Aktiver overflow interrupt
 	TIMSK |= (1<<OCIE0);
 	
+	//Velg prescaler og modus. CS00 og CS02 => prescaler 1024,  WGM01 => CTC-modus
 	TCCR0 = (1<<CS00)|(1<<CS02)|(1<<WGM01);
-	
-	
 }

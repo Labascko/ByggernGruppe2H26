@@ -14,14 +14,17 @@
 Buttons read_IO_buttons(void){
 	Buttons btns;
 	slave_select(IO);
+	//Skriv kommando for å lese knapppeinputs
 	spi_mastertransmit(0x04, IO);
 	_delay_us(40);
 	
+	//leser en byte om gangen og legger tilhørende sted i btns
 	btns.right = spi_master_read(IO);
 	_delay_us(4);
-	//printf("0x%02X\n", SPDR);
+
 	btns.left = spi_master_read(IO);
 	_delay_us(4);
 	btns.nav = spi_master_read(IO);
+
 	return btns; 
 }

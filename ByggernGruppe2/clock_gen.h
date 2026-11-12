@@ -12,5 +12,4 @@
 void timer1_init(void);
 void timer0_init(void);
 
-
 #endif /* CLOCK_GEN_H_ */

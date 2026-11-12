@@ -13,41 +13,55 @@
 
 
 char MCP2515_spi_read(uint8_t address){
-	spi_mastertransmit(0x03, CAN); //read kommando
+	//Send read kommando
+	spi_mastertransmit(0x03, CAN); 
+	//Send addresse som skal leses
 	spi_mastertransmit(address, CAN);
-	char recieved = spi_master_read(CAN);//dummybyte
+	//Les data
+	char recieved = spi_master_read(CAN);
 	slave_select(NONE);
 	return recieved;
 }
 
 void MCP2515_spi_write(uint8_t address, uint8_t data) {
-	spi_mastertransmit(0x02, CAN); // WRITE-kommando
+	//Send write kommando
+	spi_mastertransmit(0x02, CAN); 
+	//Send addresse som skal skrives til
 	spi_mastertransmit(address, CAN);
+	//Send data som skal skrives
 	spi_mastertransmit(data, CAN);
 	slave_select(NONE);
 }
 
 void MCP2515_bit_modify(uint8_t address, uint8_t mask, uint8_t data){
+	//Send bit-modify kommando
 	spi_mastertransmit(0x05, CAN); //0000 0101, bit modify
+	//Send addressen som skal modifiseres
 	spi_mastertransmit(address, CAN);
+	//Send masken for modifiseringen
 	spi_mastertransmit(mask, CAN);
+	//Send modifisert data
 	spi_mastertransmit(data, CAN);
 	slave_select(NONE);
 }
 
 void MCP2515_reset(void){
+	//Send reset kommando
 	spi_mastertransmit(0xC0,CAN); //1100 0000, reset
 	slave_select(NONE);
 }
 
 char MCP2515_read_status(void){
+	//Send "read status" kommando
 	spi_mastertransmit(0xA0, CAN);
+	//Les resultat
 	char result = spi_master_read(CAN);
 	slave_select(NONE);
 	return result;
 }
 
 void MCP2515_RTS(char address){
+	//Sent "Request To Send" kommando for ønsket addresse 
 	if(address <= 7){
 		spi_mastertransmit(0x80+address, CAN);
 	}

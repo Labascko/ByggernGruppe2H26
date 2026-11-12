@@ -9,6 +9,7 @@
 #ifndef IO_BOARD_H_
 #define IO_BOARD_H_
 
+//Hentet fra "TTK4155 User IO-board"
 typedef struct __attribute__((packed)) {
 	union {
 		uint8_t right;

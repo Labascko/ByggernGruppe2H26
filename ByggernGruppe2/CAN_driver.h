@@ -9,6 +9,7 @@
 #ifndef CAN_DRIVER_H_
 #define CAN_DRIVER_H_
 
+//Derfinerer datatypen (structen) CAN_message for videre bruk
 typedef struct {
 	uint16_t id;
 	uint8_t length;

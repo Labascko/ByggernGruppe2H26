@@ -39,15 +39,16 @@ COM3 serial port
 	//uint8_t intflags = MCP2515_spi_read(0x2C);
 	//if(intflags & 0x01){
 		//CAN_r0 = 1;
-		//MCP2515_bit_modify(0x2E, 0x01, 0x00); // Tøm RX0IF
+		//MCP2515_bit_modify(0x2E, 0x01, 0x00); // Tï¿½m RX0IF
 	//}
 	//if(intflags & 0x02){
 		//CAN_r1 = 1;
-		//MCP2515_bit_modify(0x2E, 0x02, 0x00); // Tøm RX1IF
+		//MCP2515_bit_modify(0x2E, 0x02, 0x00); // Tï¿½m RX1IF
 	//}
 	////Skru av interrupt midlertidig
 	//GICR &= ~(1 << INT0);
 //}
+
 // Kommentar
 volatile int8_t CAN_r0 = 0;
 volatile int8_t CAN_r1 = 0;
@@ -65,12 +66,12 @@ ISR(INT0_vect) {
 	//printf("Intflags i hex: 0x%X\n", intflags);
 	if (intflags & 0x01) { // RX0IF
 		CAN_r0_msg = CAN_read(0); 
-		MCP2515_bit_modify(0x2C, 0x01, 0x00); // Tøm RX0IF
+		MCP2515_bit_modify(0x2C, 0x01, 0x00); // Tï¿½m RX0IF
 		CAN_r0 = 1;
 	}
 	if (intflags & 0x02) { // RX1IF
 		CAN_r1_msg = CAN_read(1); 
-		MCP2515_bit_modify(0x2C, 0x02, 0x00); // Tøm RX1IF
+		MCP2515_bit_modify(0x2C, 0x02, 0x00); // Tï¿½m RX1IF
 		CAN_r1 = 1;
 	}
 }
@@ -79,7 +80,7 @@ ISR(INT0_vect) {
 volatile int8_t joystick_pressed = 0;
 ISR(INT2_vect) {
 	
-	// Kode som kjøres når Timer0 feiler/trigger
+	// Kode som kjï¿½res nï¿½r Timer0 feiler/trigger
 	joystick_pressed = 1;
 	//Skru av interrupt	
 	GICR &= ~(1 << INT2);
@@ -114,50 +115,61 @@ ISR(TIMER0_COMP_vect){
 // 3: game over
 volatile int8_t high_score = 0;
 volatile int8_t current_score = 0;
-volatile int8_t game_state = 0;
-
 int main(void)
 {
 	// Initialiseringsfunksjoner:
+
+	//Initialiser UART
 	uart_init(MYUBRR);
-	xmem_init();	
-	timer1_init();
+	//Link UART til printf()
 	fdevopen(uart_putchar, NULL);
+
+	//Initialiser SRAM
+	xmem_init();	
+
+	//Initialiser timer 1
+	timer1_init();
+
+	//Initialiser joystick knapp
 	init_joy_b();
 
+	//Kalibrer joystick ved Ã¥ mÃ¥le posisjon ved oppstart og trekke fra ved senere mÃ¥linger
 	joy_pos joy_diff = {0,0};
 	joy_calibrate_auto(&joy_diff);
+	//Variabler for Ã¥ bestemme joystick retning
+	joy_dir direction = NEUTRAL;
+	joy_dir new_direction = NEUTRAL;
+
+	//Variabel for Ã¥ holde oversikt over mÃ¥l
+	int8_t goals = 0;
 	
+	//Initialiser SPI
 	spi_masterinit();
 	
+	//Initialiser OLED, og gÃ¥ til (0,0)
 	OLED_init();
 	OLED_reset();
-	
 	OLED_goto_column(0);
 	OLED_goto_line(0);
 	OLED_clear_line(1);
 	
+	//Initialiser menyene slik at de inneholder Ã¸nsket informasjon
 	init_menus();
-	
-	//SRAM_test();
-	//uart_transmit(uart_recieve());
-	joy_dir direction = NEUTRAL;
-	joy_dir new_direction = NEUTRAL;
+
+	//set enable interrupt (Skru pÃ¥ global interrupts) (cli() kan brukes for Ã¥ skru av)
 	sei();
 	
-	
-	MCP2515_reset();
-	_delay_ms(10); // Gi MCP2515 litt tid til å starte opp
-	
+	//Initialiser CAN-kontroller 
 	CAN_init();
 	_delay_ms(100);
+
+
 	printf("Starting node 1: \n");
-	
-	int8_t goals = 0;
 	while(1){
-		
+		//MÃ¥l retning pÃ¥ joystick
 		new_direction = joy_dir_read(joy_diff);
 		if(direction!=new_direction){
+			//FLytt posisjon i menyen ved endring i joystick-retning
 			if(new_direction == UP && current_menu->position>0){
 				current_menu->position -= 1;
 				}else if(new_direction == DOWN && current_menu->position<current_menu->num_items){
@@ -165,30 +177,27 @@ int main(void)
 			}
 		}
 		direction = new_direction;
+
+		//Skriv valgt meny til skjermen
 		OLED_print_menu(*current_menu);
 		
 		if(current_menu->title == "spill"){
-			// spill logikk -> game over
+			//Send informasjon til node 2 for Ã¥ styre spillet
 			controls_send(joy_pos_read(joy_diff), touchpad_read(), joystick_pressed);
+
 			if(joystick_pressed == 1){
+				//fjern et mÃ¥l dersom joystick knapp trykkes. (StÃ¸y fra solenoide gir konsekvent en scoring hver gang den fyrer)
 				goals = goals - 1;
 			}
 			
 			if(goals >= 1){
 				current_menu = &sub_menu3;
 				goals = 0;
-			}
-			
-			
-		}else if (game_state == 1){
-			// meny logikk -> spill/animasjon
-		}else if (game_state == 2){
-			// animasjonsvindu logikk () -> meny
-		}else{
-			// game over (tid) -> meny/spill
+			}	
 		}
 		
-		
+
+		//Utkast for Ã¥ printe bilde til skjermen.
 		//OLED_goto_column(0);
 		//OLED_goto_line(0);
 		////OLED_reset();
@@ -199,21 +208,17 @@ int main(void)
 			//}
 		//}
 		
-		
 		//Behandlig av flagg satt av interrupts:
-		//Reaksjon på trykking av knapp
-		
-		if (joystick_pressed) {		
+		if (joystick_pressed) {	
+			//Behandle interrupt flagg fra joystick knapp
 			joystick_pressed = 0; 
 			OLED_reset();
 			current_menu = (current_menu->items[current_menu->position].child_menu);
 		}
-	
-		
 		
 		if (CAN_r0) {
 			CAN_r0 = 0;
-			// Mottatt melding på kanal 0
+			//Behandle interrupt flagg for mottatt melding pÃ¥ kanal 0
 			if(CAN_r0_msg.id == 4){
 				goals += 1;
 			}
@@ -221,7 +226,7 @@ int main(void)
 		}
 		if (CAN_r1) {
 			CAN_r1 = 0;
-			//Mottatt melding på kanal 1
+			//Behandle interrupt flagg for mottatt melding pÃ¥ kanal 1
 			if(CAN_r0_msg.id == 4){
 				goals += 1;
 			}

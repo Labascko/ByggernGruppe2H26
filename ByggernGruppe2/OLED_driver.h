@@ -17,9 +17,7 @@ void OLED_goto_column(int column);
 void OLED_print(char* string, int n);
 void OLED_print_inverted(char* string, int n);
 
-
 typedef struct Menu Menu;
-
 typedef struct {
 	const char* text;
 	const Menu* child_menu;
@@ -34,7 +32,5 @@ struct Menu{
 };
 
 void OLED_print_menu(Menu menu);
-
-
 
 #endif /* OLED_DRIVER_H_ */
