@@ -28,11 +28,9 @@ void SysTick_Handler(void){
     now += calib;
 }
 
-
 uint64_t time_now(void){
     return now + calib - SysTick->VAL;
 }
-
 
 uint64_t usecs(uint64_t s){
     return s*calib/1000;

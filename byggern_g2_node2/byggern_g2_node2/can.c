@@ -3,6 +3,7 @@
 #include "can.h"
 #include <stdio.h>
 
+//Utlevert kode
 void can_printmsg(CanMsg m){
     printf("CanMsg(id:%d, length:%d, data:{", m.id, m.length);
     if(m.length){
@@ -55,8 +56,8 @@ void can_init(CanInit init, uint8_t rxInterrupt){
     // receive
     CAN0->CAN_MB[rxMailbox].CAN_MAM = 0; // Accept all messages
 	
-    CAN0->CAN_MB[rxMailbox].CAN_MID = CAN_MID_MIDE; //Bytte basert på gemini
-	//CAN0->CAN_MB[rxMailbox].CAN_MID = 0;// Fjern CAN_MID_MIDE for å ta imot 11-bit
+    CAN0->CAN_MB[rxMailbox].CAN_MID = CAN_MID_MIDE; //Bytte basert pï¿½ gemini
+	//CAN0->CAN_MB[rxMailbox].CAN_MID = 0;// Fjern CAN_MID_MIDE for ï¿½ ta imot 11-bit
 	
     CAN0->CAN_MB[rxMailbox].CAN_MMR = CAN_MMR_MOT_MB_RX;
     CAN0->CAN_MB[rxMailbox].CAN_MCR |= CAN_MCR_MTCR;
@@ -78,8 +79,8 @@ void can_tx(CanMsg m){
 	}
     
     // Set message ID and use CAN 2.0B protocol
-    CAN0->CAN_MB[txMailbox].CAN_MID = CAN_MID_MIDvA(m.id) | CAN_MID_MIDE ; //Byttet basert på gemini
-	//CAN0->CAN_MB[txMailbox].CAN_MID = CAN_MID_MIDvA(m.id);// Fjern CAN_MID_MIDE for å sende 11-bit
+    CAN0->CAN_MB[txMailbox].CAN_MID = CAN_MID_MIDvA(m.id) | CAN_MID_MIDE ; //Byttet basert pï¿½ gemini
+	//CAN0->CAN_MB[txMailbox].CAN_MID = CAN_MID_MIDvA(m.id);// Fjern CAN_MID_MIDE for ï¿½ sende 11-bit
         
     // Coerce maximum 8 byte length
     m.length = m.length > 8 ? 8 : m.length;

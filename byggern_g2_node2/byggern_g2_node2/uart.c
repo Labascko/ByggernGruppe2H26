@@ -3,6 +3,7 @@
 
 #define F_CPU 84000000
 
+//Utlevert kode:
 typedef struct RingBuf RingBuf;
 struct RingBuf {
     uint8_t buffer[1024];

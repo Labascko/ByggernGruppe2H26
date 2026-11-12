@@ -196,18 +196,6 @@ int main(void)
 			}	
 		}
 		
-
-		//Utkast for å printe bilde til skjermen.
-		//OLED_goto_column(0);
-		//OLED_goto_line(0);
-		////OLED_reset();
-		//PORTB |= (1<<PB0);
-		//for(uint8_t i = 0; i < 128; i++){
-			//for(uint8_t u = 0; u < 8; u++){
-				//spi_mastertransmit(pgm_read_byte(&frame0[i][u]), OLED);
-			//}
-		//}
-		
 		//Behandlig av flagg satt av interrupts:
 		if (joystick_pressed) {	
 			//Behandle interrupt flagg fra joystick knapp
